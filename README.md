@@ -1,13 +1,38 @@
-# Kaulinio cemento laikmatis
+# CEMENT TIMER PRO
 
-Lietuviška statinė svetainė operacinės monitoriui ir telefonui. Matuoja praėjusį laiką nuo paspaudimo „Pradėti maišymą“. Personalas rankiniu būdu žymi etapus; paskutinė žyma užbaigia ciklą. Kitam ciklui reikia patvirtinti ankstesnio ciklo išvalymą.
+Lietuviška kaulinio cemento paruošimo eigos **demonstracinė** stebėjimo sąsaja operacinės monitoriui ir telefonui. Stambus chronometras skaičiuoja laiką nuo maišymo pradžios. Demonstracinis režimas rodo keturias fazes, likusį laiką ir proporcingą laiko juostą. Rankinis režimas leidžia žymėti stebimus etapus be apskaičiuotų fazių.
 
-Tai pagalbinis chronometras, ne klinikinio sprendimo priemonė. Nėra numatytųjų stingimo laikų ar automatinio stingimo nustatymo. Naudokite gamintojo instrukciją ir operacinės protokolą, o prieš klinikinį naudojimą patikrinkite darbo eigą ir turėkite atsarginį laikmatį. Išjungtame arba užrakintame ekrane rodinio nematysite.
+**Nevaliduota medicinos priemonė. Neskirta pacientų priežiūrai ar klinikiniams sprendimams.**
 
-Ciklas saugomas naršyklėje; nėra pacientų duomenų laukų, serverio duomenų bazės, analitikos ar sinchronizacijos tarp įrenginių. Skirtinguose įrenginiuose atverti laikmačiai nepriklausomi. Atkuriant po perkrovimo naudojamas įrenginio sistemos laikas, todėl neteisingas ar pakeistas sistemos laikas gali iškreipti rodmenis.
+## Produktai ir temperatūra
 
-## Paleidimas ir diegimas
+- **Demonstracija:** fiktyvūs 19, 20 ir 21 °C scenarijai (numatyta 20 °C), netaikomi jokiam konkrečiam cementui.
+- **Rankinis chronometras:** temperatūrinio modelio nėra. Rankinės žymos nėra medžiagos būklės įvertinimas.
+- **Refobacin Bone Cement R** ir **Hi-Fatigue G Bone Cement:** automatiniai profiliai išjungti. Ši laida nepalaiko jokių kliniškai patvirtintų temperatūrų ar fazių laikų. [Šaltiniai ir istorinio IFU reikšmės](docs/cement-research.md).
 
-Lokaliai: `python3 -m http.server 8080 --bind 127.0.0.1 --directory public`, tada atidarykite <http://127.0.0.1:8080>.
+## Paleidimas ir patikra
 
-Į Cloudflare Pages keliamas tik `public/` katalogas; kompiliavimo žingsnio ir aplinkos kintamųjų nėra.
+Rekomenduojama Node.js 24. Įdiekite dev priklausomybes ir „Playwright“ naršyklę:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run build
+python3 -m http.server 8080 --bind 127.0.0.1 --directory dist
+```
+
+Atidarykite <http://127.0.0.1:8080>. „Service worker“ reikia HTTPS arba localhost. Šaltiniai yra `public/`, o diegimui naudojamas sukurtas `dist/`. [Testų ir patikros instrukcijos](docs/testing.md).
+
+## Cloudflare Pages
+
+Projektas statinis, be serverio, analitikos ir pacientų duomenų. Kurkite iš peržiūrėto Git SHA su `npm ci && npm run build`. Keliamas tik `dist/`; naudokite esamo „Direct Upload“ projekto **peržiūros** šaką, o ne `main`. Pavyzdys autentifikuotoje „Wrangler“ aplinkoje:
+
+```sh
+npx wrangler pages deploy dist --project-name openclaw-cemento-laikmatis --branch cement-timer-pro
+```
+
+Peržiūrą tikrinkite atskirame naršyklės profilyje. Į produkciją nediekite ir klinikinėje aplinkoje nenaudokite, kol neįvykdyti [validavimo ir reguliacinės peržiūros reikalavimai](docs/clinical-safety.md).
+
+## Ribojimai
+
+Pirmam apsilankymui reikia ryšio; vėliau PWA gali veikti neprisijungus, kol naršyklė išsaugo talpyklą. Įrenginio užrakinimas, perkrova ir naršyklės sustabdymas gali sutrikdyti rodymą ar laiko patikimumą. Po perkrovimo atkuriamas paskutinis išsaugotas taškas, o ne spėjamas laikas nuo maišymo pradžios. Jei laikas nepatikimas, automatinė fazių pagalba nerodoma. Nėra sinchronizacijos tarp įrenginių. [Laiko variklis ir profilių plėtra](docs/timing-engine.md).

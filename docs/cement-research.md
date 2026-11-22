@@ -1,0 +1,45 @@
+# Cement research and data release status
+
+Reviewed 2026-11-22. **Neither named product has an enabled automatic clinical profile.** Where an older IFU gives numerical values, those values are documented below for traceability, not shipped as runnable presets. No certified timings are implied. The app's selectable 19, 20 and 21 °C values belong only to a fictional demonstration profile.
+
+## Refobacin Bone Cement R — Zimmer Biomet
+
+Antibiotic-loaded, radiopaque PMMA cement (gentamicin). The historical multilingual EU instructions identify the legal manufacturer as Biomet France. Product reference, instructions, and market must match the actual package; do not apply the historical EU table to the US presentation identified as 110034355.
+
+| Source | Edition and scope |
+| --- | --- |
+| [Zimmer Biomet product information](https://www.zimmerbiomet.com/en/products-and-solutions/specialties/cement/refobacin-bone-cement-r.html) | US product presentation; does not establish the current EU IFU or a numeric timing preset. |
+| [Mixing chart, 1720.1-US-en-REV1217](https://www.zimmerbiomet.com/content/dam/zimmer-biomet/medical-professionals/cement/modern-cementing-technique/1720.1-US-en-Biomet-Bone-Cement-R-and-Refobacin-Bone-Cement-Mixing-Chart.pdf) | ©2017. Provided direct URL returned 404 on review; the chart is reproduced in the manufacturer materials below. |
+| [Biomet Bone Cement R and Refobacin Bone Cement R product sheet](https://www.zimmerbiomet.com/content/dam/zb-corporate/en/products/specialties/cement/refobacin-bone-cement-r/16361USenBiometBCRandRefobacinBCRProductSheetdigital.pdf) | 1636.1-US-en-REV1217, p. 2; graphical guidance, approximately 16–25 °C, vacuum mixing and non-prechilled cement. |
+| [Modern Cementing Technique with Zimmer Biomet Bone Cement and the ClearMix Vacuum Mixing System](https://www.zimmerbiomet.com/content/dam/zb-corporate/en/products/specialties/cement/modern-cementing-technique/11112USenMCTZBBoneCementandClearMixVacuumSystemdi.pdf) | 1111.2-US-en-REV1217, US surgical technique document, p. 9 timing graph. It is not the product-specific IFU. |
+| [Manufacturer-authored multilingual Refobacin Bone Cement R IFU, historical hospital mirror](https://urazowka.piekary.pl/wp-content/uploads/2023/01/ZimmerBiomet-Refobacin-z-Gentamecin-.pdf) | Ref 9878300010, Index 03, printed update 2018-05; English printed p. 9 (Table 2), Lithuanian section at printed p. 131. References 3003920001-3, 3003920002-3, 3003940001-3, 3003940002-3, 3003960001-3. This mirror does not establish currentness. |
+| [Zimmer Biomet labeling portal](https://docs.zimmerbiomet.com/hcp) | Manufacturer's retrieval route. The portal reported a temporary service failure during verification; current exact-market revision not established. |
+
+The US graph distinguishes mixing, sticky, dough and final hardening, for vacuum mixing with non-prechilled cement. Sticky means the waiting/adhesive interval; dough is a handling phase, not an application deadline or a declaration of safety. Final hardening is a reference endpoint, not a measured material state. The historical EU IFU specifies ambient **and** component temperature at each table row; those inputs are not interchangeable with storage temperature or a midday room reading on its own.
+
+### Historical IFU Table 2 (reference only; NOT in the app)
+
+Vacuum mixing, non-prechilled. Transcribed as cumulative thresholds, in seconds from the start of mixing:
+
+| Ambient AND components | Mixing ends | Sticky ends | Dough ends | Hardening reference |
+| --- | ---: | ---: | ---: | ---: |
+| 19 °C | 30 | 110 | 285 | 660 |
+| 21 °C | 30 | 90 | 255 | 570 |
+| 23 °C | 30 | 75 | 230 | 500 |
+
+These are historical, illustrative reference times under specified conditions, not tolerances or guaranteed durations. Table entries are direct transcriptions, not digitized, interpolated or extrapolated. In particular, 20 °C is not a discrete row. Before release, confirm the current exact-market IFU, matching references and mixing system, quantitative uncertainty, and clinical applicability. Do not derive arbitrary margins from the plots.
+
+### Graph extraction cross-check (reference only)
+
+The vector graph on the US product sheet p. 2 was rendered to SVG, calibrated to time-axis ticks and temperature gridlines, and crossed at its color boundaries. At the 20 °C graph line, rounding to the nearest 0.25 min yields approximately 0.5, 1.75, 4.5, and 10.25 minutes cumulative. The rounding half-step alone is ±7.5 s; graph reading adds uncertainty and the graph does not quantify clinical variability. These values are not exact measurements and were **not** imported as presets or combined with the historical EU table.
+
+## Hi-Fatigue G Bone Cement — OSARTIS GmbH / Zimmer GmbH
+
+The identified candidate is **Hi-Fatigue G Bone Cement**, a radiopaque, gentamicin-containing PMMA cement, with OSARTIS GmbH named as manufacturer and Zimmer GmbH as distributor on the identified instructions. Do not treat a product labeled “Hi-Fatigue” without the exact formulation and reference as interchangeable.
+
+The manufacturer-authored [Hi-Fatigue G Bone Cement IFU](https://www.boa.ac.uk/static/0df0f93a-4b1e-4423-96935bae082423fd/Hi-Fatigue-Bone-Cement-IFU.pdf), 135-0579-02, English printed pp. 2–7, is hosted by the British Orthopaedic Association. The IFU specifies intended ambient handling at 18–23 °C for non-prechilled material, with separate manual and vacuum graphs whose axes extend to 25 °C; the IFU includes nominal mixing guidance and qualitative material checks. These curves are not a numerical release table. Neither reliable figure-derived timing values nor the exact currently distributed variant/IFU for the intended use were established. No values or mixing assumption from Refobacin were transferred.
+
+### Supplemental Hi-Fatigue G cross-checks
+
+- Hi-Fatigue G example: 1 × 40 g, REF 00-1121-140-01, with 0.55 g active gentamicin (0.9 g sulfate) in the stated presentation. [FDA K192379](https://www.accessdata.fda.gov/cdrh_docs/pdf19/K192379.pdf) corroborates the product and manufacturer; it does not verify these timing presets.
+- The [NHS-hosted manufacturer IFU](https://azuksappnpdsa01.blob.core.windows.net/datashare/Zimmer-Biomet-Hi-Fatigue-Bone-Cement-Instructions-for-Use-IFU.pdf) is revision 135-0579-02 (2020-04-21). English p. 5 specifies 18–23 °C for intended handling even though the plotted axis extends to 25 °C. The [Zimmer Biomet EMEA brochure](https://azuksappnpdsa01.blob.core.windows.net/datashare/Zimmer-Biomet-Hi-Fatigue-and-Optivac-Brochure.pdf) (2456.2-EMEA-en-REV0619) distinguishes Hi-Fatigue from Hi-Fatigue G. The [separate mixing chart](https://azuksappnpdsa01.blob.core.windows.net/datashare/Zimmer-Biomet-Hi-Fatigue-G-Bone-Cement-Mixing-Chart.pdf) (2004.1-OUS-en-REV0418) cites an older IFU. [NHS March 2026 supplemental guidance](https://azuksappnpdsa01.blob.core.windows.net/datashare/3261-Heraeus-Medical-Zimmer-Mixing-Guidance-13-March-2026.pdf) addresses reports of longer setting under a distinct mixing context; it is not a replacement IFU or a complete dataset.
