@@ -2,47 +2,128 @@
 <html lang="lt">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101616">
-  <title>Kaulinio cemento laikmatis</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="app.js" defer></script>
+  <meta name="theme-color" content="#101619">
+  <meta name="description" content="Kaulinio cemento maišymo chronometras ir demonstracinis procesas, skirtas darbo eigai įvertinti.">
+  <title>Cement Timer Pro</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <script type="module" src="./app.js"></script>
+  <script type="module" src="./sw-register.js"></script>
 </head>
-<body>
-  <header>
-    <div class="brand"><span class="brand-icon" aria-hidden="true">+</span> Endoprotezavimas</div>
-    <button id="fullscreen" class="secondary" hidden>Visas ekranas</button>
+<body data-mode="demo">
+  <header class="masthead">
+    <h1><span class="brand-mark" aria-hidden="true"></span>Cement Timer <span class="brand-pro">Pro</span></h1>
+    <div class="display-actions">
+      <button id="wake" type="button" class="quiet" aria-pressed="false" hidden>Neužmigdyti ekrano</button>
+      <button id="or-mode" type="button" class="quiet" aria-pressed="false" disabled>OR režimas</button>
+    </div>
   </header>
+
   <main>
-    <section class="clock" aria-labelledby="title">
-      <h1 id="title">Kaulinio cemento laikmatis</h1>
-      <p class="clock-label" id="clock-label">Laikas nuo maišymo pradžios</p>
-      <div id="elapsed" role="timer" aria-labelledby="clock-label">00:00</div>
-      <p id="status" role="status">Paruošta pradėti</p>
-      <button id="start" class="primary">Pradėti maišymą</button>
-      <button id="reset" class="secondary" hidden>Naujas ciklas</button>
-      <p id="message" role="alert" hidden></p>
-    </section>
-    <section class="timeline" aria-labelledby="timeline-title">
-      <h2 id="timeline-title">Etapų žymos</h2>
-      <p class="hint">Pažymėkite, kai etapas faktiškai įvyksta.</p>
-      <ol id="stages"></ol>
+    <section class="monitor" aria-label="Laikmačio rodinys">
+      <div class="session-heading">
+        <p id="session-mode" class="mode">Demonstracija</p>
+        <p id="session-config">Mokomasis profilis · 20 °C</p>
+      </div>
+
+      <div class="clock">
+        <p id="clock-label" class="clock-label">Laikas nuo maišymo pradžios</p>
+        <div id="elapsed" role="timer" aria-labelledby="clock-label">00:00</div>
+      </div>
+
+      <p id="notice" class="notice" role="status" hidden></p>
+
+      <div class="phase-card">
+        <div class="phase-current">
+          <p id="phase-label" class="phase-label">Būsena</p>
+          <p id="phase" role="status">Paruošta pradėti</p>
+        </div>
+        <div class="phase-next">
+          <div id="countdown">
+            <p id="remaining-label" class="phase-label">Numatoma maišymo trukmė</p>
+            <p id="remaining">—</p>
+          </div>
+          <p id="next-phase" hidden></p>
+        </div>
+      </div>
+
+      <section id="timeline" class="timeline" aria-labelledby="timeline-title">
+        <div class="timeline-heading">
+          <h2 id="timeline-title">Numatoma proceso eiga</h2>
+          <p id="timeline-summary"></p>
+        </div>
+        <div id="timeline-track" class="timeline-track" aria-hidden="true">
+          <div id="timeline-marker" class="timeline-marker" hidden></div>
+        </div>
+        <ol id="timeline-labels" class="timeline-labels"></ol>
+      </section>
+      <section class="controls" aria-label="Ciklo valdymas">
+        <div id="setup">
+          <div class="setup-fields">
+            <label class="field" for="product">
+              <span>Profilis</span>
+              <select id="product"></select>
+            </label>
+            <fieldset id="temperature-field" class="field temp-field">
+              <legend>Temperatūra</legend>
+              <div class="stepper">
+                <button id="temperature-minus" type="button" aria-label="Sumažinti temperatūrą">−</button>
+                <output id="temperature" for="temperature-minus temperature-plus" aria-live="polite">20 °C</output>
+                <button id="temperature-plus" type="button" aria-label="Padidinti temperatūrą">+</button>
+              </div>
+            </fieldset>
+            <p id="method" class="method"></p>
+          </div>
+
+          <div class="setup-actions">
+            <label class="check" for="conditions">
+              <input id="conditions" type="checkbox">
+              <span id="conditions-label">Suprantu, kad demonstraciniai laikai sintetiniai ir netinka klinikiniam naudojimui.</span>
+            </label>
+            <button id="start" type="button" class="primary" disabled>Pradėti maišymą</button>
+          </div>
+        </div>
+
+        <div id="session-actions" class="session-actions" hidden>
+          <button id="manual-next" type="button" class="primary" hidden></button>
+          <button id="abandon" type="button" class="quiet" hidden>Anuliuoti ciklą</button>
+          <button id="new-session" type="button" class="quiet" hidden>Naujas ciklas</button>
+        </div>
+      </section>
     </section>
   </main>
+
   <footer>
-    <p>Pagalbinis laikmatis. Vadovaukitės konkretaus cemento gamintojo instrukcija ir operacinės protokolu. Laikmatis nenustato, ar cementas sustingo.</p>
-    <p>Duomenys lieka šioje naršyklėje. Įrenginiai tarpusavyje nesinchronizuojami.</p>
+    <details class="sources">
+      <summary>Šaltiniai ir naudojimo ribos</summary>
+      <div class="source-content">
+        <p>Skirta darbo eigai įvertinti. Tai nėra validuota medicinos priemonė. Laikmatis nenustato, ar cementas sukietėjo, ir nenurodo saugaus implantavimo intervalo. Vadovaukitės konkretaus produkto galiojančia instrukcija ir operacinės protokolu.</p>
+        <p>„Refobacin Bone Cement R“ ir „Hi-Fatigue G“ automatiniai profiliai neįjungti: nėra parengto, patikrinto skaitinių ribų rinkinio. Demonstraciniai laikai yra sintetiniai ir nesusieti su šiais produktais.</p>
+        <ul>
+          <li><a href="https://www.zimmerbiomet.com/content/dam/zb-corporate/en/products/specialties/cement/refobacin-bone-cement-r/16361USenBiometBCRandRefobacinBCRProductSheetdigital.pdf#page=2" target="_blank" rel="noopener">„Zimmer Biomet“ maišymo grafikas, produkto aprašo 2 psl.</a>: iš anksto nešaldytas cementas, maišymas vakuume.</li>
+          <li><a href="https://www.zimmerbiomet.com/en/products-and-solutions/specialties/cement/refobacin-bone-cement-r.html" target="_blank" rel="noopener">„Refobacin Bone Cement R“ produkto informacija</a></li>
+          <li><a href="https://www.boa.ac.uk/static/0df0f93a-4b1e-4423-96935bae082423fd/Hi-Fatigue-Bone-Cement-IFU.pdf" target="_blank" rel="noopener">„Hi-Fatigue G“ gamintojo instrukcija 135-0579-02 (BOA kopija)</a></li>
+        </ul>
+        <p>Realią eigą veikia temperatūra, mišinio sudėtis, laikymas, paruošimas ir maišymo būdas. Prieš klinikinį diegimą būtinas validavimas bei rizikos ir taikomų teisės aktų įvertinimas.</p>
+        <p>Ciklas saugomas šiame naršyklės profilyje; tarp įrenginių nesinchronizuojamas.</p>
+      </div>
+    </details>
+    <p>Vertinimui · Ne klinikiniams sprendimams</p>
   </footer>
-  <dialog id="confirm-reset" aria-labelledby="confirm-title">
+
+  <dialog id="confirm-action" aria-labelledby="confirm-title" aria-describedby="confirm-body">
     <form method="dialog">
-      <h2 id="confirm-title">Pradėti naują ciklą?</h2>
-      <p>Dabartinio ciklo laikas ir etapų žymos bus išvalyti.</p>
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-body"></p>
       <div class="dialog-actions">
-        <button class="secondary" value="cancel" autofocus>Atšaukti</button>
-        <button class="primary" value="reset">Išvalyti ciklą</button>
+        <button id="confirm-no" type="submit" value="cancel" class="quiet" autofocus>Atšaukti</button>
+        <button id="confirm-yes" type="submit" value="confirm" class="primary"></button>
       </div>
     </form>
   </dialog>
+  <noscript>Laikmačiui reikia, kad naršyklėje būtų įjungtas „JavaScript“.</noscript>
 </body>
 </html>
