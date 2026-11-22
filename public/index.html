@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101616">
+  <title>Kaulinio cemento laikmatis</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="brand-icon" aria-hidden="true">+</span> Endoprotezavimas</div>
+    <button id="fullscreen" class="secondary" hidden>Visas ekranas</button>
+  </header>
+  <main>
+    <section class="clock" aria-labelledby="title">
+      <h1 id="title">Kaulinio cemento laikmatis</h1>
+      <p class="clock-label" id="clock-label">Laikas nuo maišymo pradžios</p>
+      <div id="elapsed" role="timer" aria-labelledby="clock-label">00:00</div>
+      <p id="status" role="status">Paruošta pradėti</p>
+      <button id="start" class="primary">Pradėti maišymą</button>
+      <button id="reset" class="secondary" hidden>Naujas ciklas</button>
+      <p id="message" role="alert" hidden></p>
+    </section>
+    <section class="timeline" aria-labelledby="timeline-title">
+      <h2 id="timeline-title">Etapų žymos</h2>
+      <p class="hint">Pažymėkite, kai etapas faktiškai įvyksta.</p>
+      <ol id="stages"></ol>
+    </section>
+  </main>
+  <footer>
+    <p>Pagalbinis laikmatis. Vadovaukitės konkretaus cemento gamintojo instrukcija ir operacinės protokolu. Laikmatis nenustato, ar cementas sustingo.</p>
+    <p>Duomenys lieka šioje naršyklėje. Įrenginiai tarpusavyje nesinchronizuojami.</p>
+  </footer>
+  <dialog id="confirm-reset" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title">Pradėti naują ciklą?</h2>
+      <p>Dabartinio ciklo laikas ir etapų žymos bus išvalyti.</p>
+      <div class="dialog-actions">
+        <button class="secondary" value="cancel" autofocus>Atšaukti</button>
+        <button class="primary" value="reset">Išvalyti ciklą</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
