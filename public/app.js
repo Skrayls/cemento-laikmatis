@@ -283,7 +283,7 @@ for (const item of PRODUCTS) {
   const option = document.createElement('option');
   option.value = item.id;
   option.disabled = item.status === 'disabled';
-  const name = profileName(item.id, item.name);
+  const name = item.id === 'demo' ? 'Mokomasis' : profileName(item.id, item.name);
   option.textContent = option.disabled ? `${name} — nepatvirtinta` : name;
   product.append(option);
 }

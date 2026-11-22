@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "CEMENT TIMER PRO",
+  "short_name": "Cemento laikmatis",
+  "lang": "lt",
+  "description": "Kaulinio cemento darbo eigos laikmatis vertinimui ir mokymui",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101517",
+  "theme_color": "#101517",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
