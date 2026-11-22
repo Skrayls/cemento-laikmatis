@@ -8,7 +8,7 @@ Lietuviška kaulinio cemento paruošimo eigos **demonstracinė** stebėjimo sąs
 
 - **Demonstracija:** fiktyvūs 19, 20 ir 21 °C scenarijai (numatyta 20 °C), netaikomi jokiam konkrečiam cementui.
 - **Rankinis chronometras:** temperatūrinio modelio nėra. Rankinės žymos nėra medžiagos būklės įvertinimas.
-- **Refobacin Bone Cement R** ir **Hi-Fatigue G Bone Cement:** automatiniai profiliai išjungti. Ši laida nepalaiko jokių kliniškai patvirtintų temperatūrų ar fazių laikų. [Šaltiniai ir istorinio IFU reikšmės](docs/cement-research.md).
+- **Refobacin Bone Cement R** ir **Hi-Fatigue G Bone Cement:** automatiniai profiliai išjungti. Ši laida nepalaiko jokių kliniškai patvirtintų temperatūrų ar fazių laikų. [Gamintojų šaltiniai, grafikų rodmenys ir duomenų ribos](docs/cement-research.md).
 
 ## Paleidimas ir patikra
 
