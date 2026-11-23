@@ -10,6 +10,7 @@ const output = join(root, 'dist');
 const staticAssets = [
   'index.html', 'style.css', 'app.js', 'products.mjs', 'evidence.mjs', 'timing.mjs',
   'sw-register.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png',
+  'apple-touch-icon.png',
 ];
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
