@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const source = join(root, 'public');
 const output = join(root, 'dist');
 const staticAssets = [
-  'index.html', 'style.css', 'app.js', 'products.mjs', 'timing.mjs',
+  'index.html', 'style.css', 'app.js', 'products.mjs', 'evidence.mjs', 'timing.mjs',
   'sw-register.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png',
 ];
 

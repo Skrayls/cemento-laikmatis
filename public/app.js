@@ -11,10 +11,6 @@ function element(id) {
 }
 
 const product = /** @type {HTMLSelectElement} */ (element('product'));
-const temperature = /** @type {HTMLOutputElement} */ (element('temperature'));
-const minus = /** @type {HTMLButtonElement} */ (element('temperature-minus'));
-const plus = /** @type {HTMLButtonElement} */ (element('temperature-plus'));
-const temperatureField = /** @type {HTMLFieldSetElement} */ (element('temperature-field'));
 const conditions = /** @type {HTMLInputElement} */ (element('conditions'));
 const start = /** @type {HTMLButtonElement} */ (element('start'));
 const abandon = /** @type {HTMLButtonElement} */ (element('abandon'));
@@ -36,14 +32,23 @@ const phases = [
   { title: 'Galutinis kietėjimas', short: 'Kietėjimas' }
 ];
 
-const activeTitle = 'Numatytas kietėjimo laikas pasiektas';
 const displayLabel = 'Laikas nuo maišymo pradžios';
 const getClock = () => ({ wall: Date.now(), mono: performance.now() });
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const demo = PRODUCTS.find(item => item.id === 'demo');
-let temp = demo.temperatures.includes(20) ? 20 : demo.temperatures[0];
-// Default to manual chronometer (no synthetic times, no temperature).
-let draft = resolveConfig('manual', null);
+const referencePhases = [
+  { title: 'Iki tešlos orientyro', short: 'Tešlos susidarymas' },
+  { title: 'Po tešlos orientyro', short: 'Sukietėjimo orientyras' },
+];
+const manufacturerPhases = {
+  refobacin: ['Maišymas', 'Lipnioji fazė', 'Tešlos fazė', 'Galutinis kietėjimas'],
+  'hi-fatigue': ['Maišymas', 'Laukimas', 'Aplikacija', 'Kietėjimas'],
+};
+function phasesFor(config) {
+  if (config.mode === 'reference') return referencePhases;
+  const titles = manufacturerPhases[config.productId];
+  return titles ? titles.map(title => ({ title, short: title })) : phases;
+}
+let draft = resolveConfig('pmma');
 let live = null;
 let expectedRecord = null;
 let legacyRecord = null;
@@ -96,7 +101,7 @@ function renderNotice() {
 }
 
 function profileName(id, fallback) {
-  if (id === 'demo') return 'Mokomasis profilis';
+  if (id === 'demo') return 'Ankstesnis ciklas';
   if (id === 'manual') return 'Rankinis chronometras';
   return fallback;
 }
@@ -106,7 +111,8 @@ function buildTimeline(config) {
   track.replaceChildren();
   timelineLabels.replaceChildren();
   let previous = 0;
-  timelineRows = phases.map((phase, index) => {
+  timelineLabels.style.setProperty('--steps', phasesFor(config).length);
+  timelineRows = phasesFor(config).map((phase, index) => {
     const boundary = config.boundaries?.[index];
     const duration = boundary === undefined ? 1 : boundary - previous;
     previous = boundary ?? 0;
@@ -140,7 +146,7 @@ function renderTimeline(config, state, elapsed, index, uncertain) {
   const active = state?.status === 'active';
   const marks = state?.marks ?? [];
   const displayElapsed = reducedMotion.matches && elapsed < total ? Math.floor(elapsed / 1000) * 1000 : elapsed;
-  setText(element('timeline-title'), total ? 'Numatoma proceso eiga' : 'Rankiniu būdu pažymėti etapai');
+  setText(element('timeline-title'), total ? 'Literatūros atskaitos taškai' : 'Rankiniu būdu pažymėti etapai');
   const summary = element('timeline-summary');
   summary.hidden = Boolean(total) || !state;
   if (!summary.hidden) setText(summary, `${marks.length - 1} / 4 žymų`);
@@ -152,7 +158,7 @@ function renderTimeline(config, state, elapsed, index, uncertain) {
     if (width) {
       const gap = 3;
       const progress = Math.min(1, displayElapsed / total);
-      const x = progress * (width - 3 * gap) + phase * gap;
+      const x = progress * (width - (timelineRows.length - 1) * gap) + phase * gap;
       marker.style.setProperty('--position', `${x / width * 100}%`);
     }
   }
@@ -179,12 +185,15 @@ function renderClock(tick = null) {
   const config = state?.config ?? draft;
   const active = state?.status === 'active';
   const modeled = config.boundaries !== null;
+  const reference = config.mode === 'reference';
+  const oldSchedule = config.mode === 'demo';
+  const steps = phasesFor(config);
   const phase = phaseAt(config, elapsed, state?.marks);
   let title = 'Paruošta pradėti';
   let phaseLabel = 'Būsena';
   let modePhase = 'idle';
   let remaining = null;
-  let remainingLabel = 'Numatoma maišymo trukmė';
+  let remainingLabel = 'Iki tešlos orientyro';
   let nextTitle = '';
 
   if (uncertain) {
@@ -192,18 +201,20 @@ function renderClock(tick = null) {
     modePhase = 'uncertain';
   } else if (state && !active) {
     title = state.status === 'archived' ? 'Ankstesnis ciklas baigtas' : 'Ciklas anuliuotas';
+  } else if (active && oldSchedule) {
+    title = 'Ankstesnis ciklas · tik praėjęs laikas';
   } else if (active) {
     modePhase = String(phase.index);
     if (phase.complete) {
-      title = modeled ? activeTitle : 'Etapai pažymėti';
+      title = modeled ? 'Paskutinis orientyras pasiektas' : 'Etapai pažymėti';
     } else {
-      phaseLabel = modeled ? 'Dabartinė fazė' : 'Paskutinė pažymėta fazė';
-      title = phases[phase.index].title;
+      phaseLabel = reference ? 'Tyrimo orientyras' : 'Paskutinė pažymėta fazė';
+      title = steps[phase.index].title;
       remaining = phase.remaining;
-      remainingLabel = phase.index === 3 ? 'Iki numatytos ribos' : 'Iki kitos fazės';
-      if (phase.index < 3) {
+      remainingLabel = phase.index === 0 ? 'Iki tešlos orientyro' : 'Iki sukietėjimo orientyro';
+      if (phase.index < steps.length - 1) {
         const nextLabel = modeled ? 'Toliau' : 'Kita žyma';
-        nextTitle = `${nextLabel}: ${phases[phase.index + 1].title.toLocaleLowerCase('lt')}`;
+        nextTitle = `${nextLabel}: ${(reference ? steps[phase.index + 1].short : steps[phase.index + 1].title).toLocaleLowerCase('lt')}`;
       }
     }
   } else if (modeled) {
@@ -225,39 +236,31 @@ function renderClock(tick = null) {
   next.hidden = !nextTitle;
   setText(next, nextTitle);
   nextCard.hidden = remaining === null && !nextTitle;
-  renderTimeline(config, state, elapsed, phase.index, uncertain);
+  renderTimeline(config, state, elapsed, phase.index, uncertain || oldSchedule);
 }
 
 function renderControls() {
   const state = live?.state;
   const config = state?.config ?? draft;
-  const selected = PRODUCTS.find(item => item.id === product.value);
+  const selected = PRODUCTS.find(item => item.id === config.productId);
   const active = state?.status === 'active';
   const adjustable = !state && !concurrent && !corruptRecord && !pending;
   const modeled = config.boundaries !== null;
-  const simulation = config.mode === 'demo';
+  const steps = phasesFor(config);
   document.body.dataset.mode = config.mode;
   document.body.dataset.running = String(active);
-  setText(element('session-mode'), simulation ? 'Demonstracija' : modeled ? 'Numatomas profilis' : 'Rankinis režimas');
+  setText(element('session-mode'), selected?.reason ?? 'Rankinis režimas');
   const name = profileName(config.productId, config.name);
-  setText(element('session-config'), config.temp === null ? name : `${name} · ${config.temp} °C`);
+  setText(element('session-config'), config.mode !== 'reference' ? name : `${name} · ${config.temp} °C`);
   element('setup').hidden = Boolean(state) || corruptRecord;
   element('session-actions').hidden = !state && !corruptRecord;
   product.disabled = !adjustable;
-  temperatureField.hidden = !modeled;
-  const availableTemperatures = selected?.temperatures ?? [];
-  const temperatureIndex = availableTemperatures.indexOf(temp);
-  minus.disabled = !adjustable || temperatureIndex <= 0;
-  plus.disabled = !adjustable || temperatureIndex < 0 || temperatureIndex === availableTemperatures.length - 1;
-  setText(temperature, `${temp} °C`);
   conditions.disabled = !adjustable;
-  setText(element('conditions-label'), simulation
-    ? 'Suprantu, kad demonstraciniai laikai sintetiniai ir netinka klinikiniam naudojimui.'
-    : modeled ? 'Patvirtinu, kad paruošimo ir maišymo sąlygos atitinka pasirinktą profilį.'
-      : 'Suprantu, kad laikmatis nenustato fazių; jas pažymėsiu rankiniu būdu.');
-  setText(element('method'), simulation ? 'Imituojami etapai; gamintojo maišymo metodas netaikomas.'
-    : modeled ? `${config.method} · ${config.conditions}`
-      : 'Chronometras be temperatūros modelio ir automatinių perėjimų.');
+  setText(element('conditions-label'), modeled
+    ? 'Suprantu, kad tyrimo orientyrai nenustato cemento parengties.'
+    : 'Etapus žymėsiu rankiniu būdu pagal taikomą instrukciją.');
+  setText(element('method'), modeled ? `${config.method} · ${config.conditions}`
+    : 'Chronometras be automatinių fazių perėjimų.');
   start.disabled = !adjustable || !conditions.checked;
   abandon.hidden = !active;
   abandon.disabled = concurrent || pending;
@@ -267,7 +270,7 @@ function renderControls() {
   manualNext.hidden = !active || modeled || Boolean(state.issue) || concurrent || state.marks.length > phases.length;
   manualNext.disabled = concurrent || pending;
   if (!manualNext.hidden) {
-    const label = state.marks.length < phases.length ? phases[state.marks.length].title : 'Baigti etapų žymėjimą';
+    const label = state.marks.length < phases.length ? steps[state.marks.length].title : 'Baigti etapų žymėjimą';
     setText(manualNext, state.marks.length < phases.length ? `Pažymėti: ${label.toLocaleLowerCase('lt')}` : label);
   }
   modeButton.disabled = changingDisplay || (!active && !document.body.classList.contains('or-mode'));
@@ -282,15 +285,8 @@ function render() {
   queueAnimation();
 }
 
-  for (const item of PRODUCTS) {
-    const option = document.createElement('option');
-    option.value = item.id;
-    option.disabled = item.status === 'disabled';
-    const name = item.id === 'demo' ? 'Demonstracija' : profileName(item.id, item.name);
-    option.textContent = option.disabled ? `${name} — nepatvirtinta` : name;
-    product.append(option);
-  }
-    product.value = draft.productId;
+for (const item of PRODUCTS) product.add(new Option(item.name, item.id));
+product.value = draft.productId;
 
 function readRecord() {
   try {
@@ -394,24 +390,12 @@ async function restore() {
 await restore();
 render();
 
-function switchConfig(delta) {
-  const selected = PRODUCTS.find(item => item.id === product.value);
-  if (!selected || selected.status === 'disabled' || live) return;
-  const supported = selected.temperatures ?? [];
-  if (delta) {
-    const changed = supported[supported.indexOf(temp) + delta];
-    if (changed === undefined) return;
-    temp = changed;
-  }
-  if (supported.length && !supported.includes(temp)) temp = supported.includes(20) ? 20 : supported[0];
-  draft = resolveConfig(selected.id, supported.length ? temp : null);
+product.addEventListener('change', () => {
+  if (live) return;
+  draft = resolveConfig(product.value);
   conditions.checked = false;
   render();
-}
-
-product.addEventListener('change', () => switchConfig(0));
-minus.addEventListener('click', () => switchConfig(-1));
-plus.addEventListener('click', () => switchConfig(1));
+});
 conditions.addEventListener('change', renderControls);
 
 start.addEventListener('click', async () => {

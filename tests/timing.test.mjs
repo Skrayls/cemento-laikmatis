@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import { demoConfig } from './demo-fixture.mjs';
 import assert from 'node:assert/strict';
 import { PRODUCTS, resolveConfig } from '../public/products.mjs';
 import {
@@ -10,7 +11,7 @@ import {
 
 const WALL = 1700000000000;
 const MONO = 125.5;
-const demo = resolveConfig('demo');
+const demo = demoConfig();
 const manual = resolveConfig('manual');
 
 /** @param {number} wallDelta @param {number} [monoDelta] */
@@ -33,28 +34,28 @@ test('storage keys use the current and legacy browser contracts', () => {
   assert.equal(LEGACY_KEY, 'cemento-laikmatis-v1');
 });
 
-test('catalog offers only generic demo/manual modes and lists both disabled products exactly', () => {
+test('catalog offers one literature profile and two manual product profiles', () => {
   assert.deepEqual(PRODUCTS.map(({ id, status, temperatures }) => [id, status, temperatures]), [
-    ['demo', 'demo', [19, 20, 21]], ['manual', 'manual', []],
-    ['refobacin', 'disabled', []], ['hi-fatigue', 'disabled', []],
+    ['pmma', 'reference', []],
+    ['refobacin', 'manual', []], ['hi-fatigue', 'manual', []],
   ]);
-  const [, , refobacin, hiFatigue] = PRODUCTS;
+  const [, refobacin, hiFatigue] = PRODUCTS;
   assert.equal(refobacin.name, 'Refobacin Bone Cement R');
   assert.equal(refobacin.manufacturer, 'Zimmer Biomet (Biomet France)');
-  assert.equal(hiFatigue.name, 'Hi-Fatigue G Bone Cement');
+  assert.equal(hiFatigue.name, 'Hi-Fatigue G');
   assert.equal(hiFatigue.manufacturer, 'OSARTIS GmbH (distributed by Zimmer GmbH)');
   for (const product of [refobacin, hiFatigue]) {
     assert.ok(product.reason);
     assert.equal(Object.hasOwn(product, 'boundaries'), false);
-    assert.throws(() => resolveConfig(product.id), /disabled/);
-    assert.throws(() => resolveConfig(product.id, 20), /disabled/);
+    assert.equal(resolveConfig(product.id).boundaries, null);
+    assert.throws(() => resolveConfig(product.id, 20), /no temperature/);
   }
 });
 
 test('demo defaults to 20°C without interpolation or coercion', () => {
-  assert.deepEqual(demo, resolveConfig('demo', 20));
+  assert.deepEqual(demo, demoConfig(20));
   for (const temp of [18, 19.5, 22, NaN, Infinity, null]) {
-    assert.throws(() => resolveConfig('demo', temp), /Unsupported/);
+    assert.throws(() => demoConfig(temp), /Unsupported/);
   }
   assert.throws(() => resolveConfig('not-a-product'), /Unknown/);
 });
@@ -85,14 +86,14 @@ const references = [
 
 for (const { temp, ends } of references) {
   test(`demo at ${temp}°C selects the exact synthetic reference and starts at 00`, () => {
-    const config = resolveConfig('demo', temp);
+    const config = demoConfig(temp);
     assert.deepEqual(config.boundaries, ends);
     assert.deepEqual(phaseAt(config, 0), { index: 0, remaining: ends[0], complete: false });
   });
 
   for (const [index, end] of ends.entries()) {
     test(`demo at ${temp}°C: phase ${index} at -1 s, exact boundary, and +1 s`, () => {
-      const config = resolveConfig('demo', temp);
+      const config = demoConfig(temp);
       const nextIndex = index + 1;
       const complete = nextIndex === ends.length;
       assert.deepEqual(phaseAt(config, end - 1000), { index, remaining: 1000, complete: false });
@@ -238,7 +239,7 @@ test('recognizes older versioned demo snapshots without comparing the current te
 test('rejects disabled or mismatched IDs and malformed config metadata', () => {
   for (const config of [
     null, {}, { ...demo, version: '' }, { ...demo, manufacturer: 10 },
-    { ...demo, productId: 'refobacin' }, { ...manual, productId: 'hi-fatigue' },
+    { ...demo, productId: 'refobacin' }, { ...manual, productId: 'pmma' },
     { ...demo, productId: 'manual' }, { ...manual, productId: 'demo' },
   ]) assert.equal(validConfig(config), false);
 });

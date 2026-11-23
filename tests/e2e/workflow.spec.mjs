@@ -9,9 +9,7 @@ async function freezeClock(page) {
 }
 
 async function startTimer(page) {
-  // Ensure demo is selected
-  await page.locator('#product').selectOption('demo');
-  await expect(page.locator('.timeline-segment')).toHaveCount(4);
+  await expect(page.locator('.timeline-segment')).toHaveCount(2);
   await page.locator('#conditions').check();
   await page.locator('#start').click();
   // Starting first claims the session lock asynchronously. Don't jump the
@@ -20,26 +18,17 @@ async function startTimer(page) {
   await expect(page.getByRole('timer')).toHaveText('00:00');
 }
 
-test('demo starts at zero, uses the selected temperature, and stays active past the final phase', async ({ page }) => {
+test('literature reference starts at zero, shows fixed study temperature, and stays active past the final phase', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
-  await page.locator('#product').selectOption('demo');
   const timer = page.getByRole('timer');
   await expect(timer).toHaveText('00:00');
   await expect(page.locator('#start')).toBeDisabled();
-  await expect(page.locator('#temperature')).toHaveText(/20\s*°C/);
-  await expect(page.locator('#product option[value="refobacin"]')).toBeDisabled();
-  await expect(page.locator('#product option[value="hi-fatigue"]')).toBeDisabled();
-  const originalBoundaries = await page.locator('#timeline-labels').innerText();
-  await page.locator('#temperature-plus').click();
-  await expect(page.locator('#temperature')).toHaveText(/21\s*°C/);
-  await expect(page.locator('#temperature-plus')).toBeDisabled();
-  await expect(page.locator('#timeline-labels')).not.toHaveText(originalBoundaries);
 
   await startTimer(page);
   await expect(page.locator('#product')).toBeHidden();
-  await expect(page.locator('#phase')).toHaveText(/maišymas/i);
-  await expect(page.locator('#session-config')).toHaveText(/21\s*°C/);
+  await expect(page.locator('#phase')).toHaveText(/iki tešlos orientyro/i);
+  await expect(page.locator('#session-config')).toHaveText(/20\s*°C/);
   await page.clock.runFor(1_100);
   await expect(timer).toHaveText('00:01');
   await expect(page.locator('#remaining')).not.toHaveText(/-/);
@@ -48,7 +37,7 @@ test('demo starts at zero, uses the selected temperature, and stays active past 
   await page.clock.fastForward(30 * 60_000);
   await page.clock.runFor(100);
   await expect(timer).toHaveText('30:01');
-  await expect(page.locator('#phase')).toHaveText(/numatytas kietėjimo laikas pasiektas/i);
+  await expect(page.locator('#phase')).toHaveText(/paskutinis orientyras pasiektas/i);
   await expect(page.locator('#remaining')).not.toHaveText(/-/);
   await page.clock.runFor(1_100);
   await expect(timer).toHaveText('30:02');
@@ -58,7 +47,7 @@ test('all modeled phases advance at their exact boundary, without a negative cou
   await freezeClock(page);
   await page.goto('/');
   await startTimer(page);
-  const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('demo', 20).boundaries);
+  const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('pmma').boundaries);
   const phase = page.locator('body');
   const currentStep = page.locator('#timeline-labels [aria-current="step"]');
   let elapsed = 0;
@@ -71,7 +60,7 @@ test('all modeled phases advance at their exact boundary, without a negative cou
       // Sample the exact fake time, as the app does when visibility changes.
       await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
       const expected = offset < 0 ? index : index + 1;
-      await expect(phase).toHaveAttribute('data-phase', String(expected));
+      await expect(phase).toHaveAttribute('data-phase', String(expected === ends.length ? 4 : expected));
       if (expected < ends.length) {
         await expect(currentStep).toHaveAttribute('data-step', String(expected));
         await expect(page.locator('#remaining')).toBeVisible();
@@ -114,12 +103,12 @@ test('cancel preserves running elapsed; abandoning and starting a new session ar
   await expect(page.locator('#conditions')).not.toBeChecked();
 });
 
-test('manual default has no temperature field and no countdown', async ({ page }) => {
+test('manufacturer profile has no temperature field or automatic countdown', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
-  // Default should be manual
   const productSelect = page.locator('#product');
-  await expect(productSelect).toHaveValue('manual');
+  await expect(productSelect).toHaveValue('pmma');
+  await productSelect.selectOption('hi-fatigue');
   await expect(page.locator('#temperature-field')).toBeHidden();
   await expect(page.locator('#remaining')).toBeHidden();
   // Conditions must be checked before start
@@ -136,7 +125,7 @@ test('manual default has no temperature field and no countdown', async ({ page }
 test('manual final marker records the phase without stopping elapsed', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
-  await page.locator('#product').selectOption('manual');
+  await page.locator('#product').selectOption('refobacin');
   await expect(page.locator('#temperature-field')).toBeHidden();
   // Conditions must be checked before start
   await expect(page.locator('#start')).toBeDisabled();
@@ -175,15 +164,13 @@ test('wall-only clock change freezes the last trustworthy elapsed and suppresses
 test('reload preserves the selected snapshot but shows an unverified elapsed gap', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
-  await page.locator('#product').selectOption('demo');
-  await page.locator('#temperature-minus').click();
   await startTimer(page);
   await page.clock.runFor(5_100);
   await expect(page.getByRole('timer')).toHaveText('00:05');
 
   await page.reload();
   await expect(page.locator('#notice')).toHaveText(/atkurt/i);
-  await expect(page.locator('#session-config')).toHaveText(/19\s*°C/);
+  await expect(page.locator('#session-config')).toHaveText(/20\s*°C/);
   await expect(page.getByRole('timer')).not.toHaveText('00:00');
   await expect(page.locator('#next-phase')).toBeHidden();
   await expect(page.locator('#start')).toBeHidden();
@@ -216,7 +203,7 @@ test('pre-cached app reloads offline and can start a new timer while disconnecte
   await startTimer(page);
   await page.clock.runFor(2_100);
   await expect(page.getByRole('timer')).toHaveText('00:02');
-  await expect(page.locator('#phase')).toHaveText(/maišymas/i);
+  await expect(page.locator('#phase')).toHaveText(/iki tešlos orientyro/i);
   await page.reload();
   await expect(page.locator('#notice')).toHaveText(/atkurt/i);
   await expect(page.getByRole('timer')).toHaveText('00:02');
@@ -321,12 +308,12 @@ for (const viewport of [
       await freezeClock(page);
       await page.goto('/');
       await startTimer(page);
-      const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('demo', 20).boundaries);
-      const workingSample = ends[1] + Math.min(5_000, Math.floor((ends[2] - ends[1]) / 2));
+      const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('pmma').boundaries);
+      const workingSample = ends[0] + 5_000;
       await page.clock.fastForward(workingSample);
       await page.clock.runFor(100);
       await expect(page.getByRole('timer')).not.toHaveText('00:00');
-      await expect(page.locator('#phase')).toHaveText(/darbinė fazė/i);
+      await expect(page.locator('#phase')).toHaveText(/po tešlos orientyro/i);
       await expect(page.locator('#phase')).toBeInViewport();
       await expect(page.locator('#timeline')).toBeInViewport({ ratio: 0.9 });
       const geometry = await page.evaluate(() => {
@@ -362,7 +349,7 @@ for (const viewport of [
 
       await page.clock.fastForward(ends.at(-1));
       await page.clock.runFor(100);
-      await expect(page.locator('#phase')).toHaveText(/numatytas kietėjimo laikas pasiektas/i);
+      await expect(page.locator('#phase')).toHaveText(/paskutinis orientyras pasiektas/i);
       await expect(page.locator('#timeline')).toBeInViewport({ ratio: 0.9 });
       expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
     });
@@ -372,22 +359,21 @@ for (const viewport of [
 test('the segmented timeline is proportional and advances with elapsed time', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
-  await page.locator('#product').selectOption('demo');
-  const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('demo', 20).boundaries);
+  const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('pmma').boundaries);
   const durations = ends.map((end, index) => end - (ends[index - 1] ?? 0));
   const segments = page.locator('.timeline-segment');
-  await expect(segments).toHaveCount(4);
+  await expect(segments).toHaveCount(2);
   const widths = await segments.evaluateAll(elements => {
     return elements.map(segment => segment.getBoundingClientRect().width);
   });
-  expect(widths).toHaveLength(4);
+  expect(widths).toHaveLength(2);
   const width = widths.reduce((sum, part) => sum + part, 0);
   widths.forEach((part, index) => expect(part / width).toBeCloseTo(durations[index] / ends.at(-1), 2));
   await startTimer(page);
   const marker = page.locator('#timeline-marker');
   const zero = await marker.boundingBox();
   await page.clock.runFor(ends[0] + 250);
-  await expect(page.locator('#phase')).toHaveText(/paruošimas/i);
+  await expect(page.locator('#phase')).toHaveText(/po tešlos orientyro/i);
   const atFirstBoundary = await marker.boundingBox();
   expect(atFirstBoundary.x).toBeGreaterThan(zero.x);
 });
@@ -411,7 +397,7 @@ test('timer glyphs retain their width as the displayed digits change', async ({ 
 
 test('automated accessibility: setup and active screen', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.timeline-segment')).toHaveCount(4);
+  await expect(page.locator('.timeline-segment')).toHaveCount(2);
   const audit = () => new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect((await audit()).violations).toEqual([]);

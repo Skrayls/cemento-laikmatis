@@ -122,7 +122,7 @@ main {
   letter-spacing: .08em;
   text-transform: uppercase;
 }
-body[data-mode="demo"] .mode { border-color: #947344; color: var(--amber); }
+body[data-mode="reference"] .mode { border-color: #947344; color: var(--amber); }
 .clock { display: grid; justify-items: center; width: 100%; row-gap: .1rem; }
 .clock-label {
   color: var(--muted);
@@ -271,7 +271,7 @@ body[data-phase="4"] #phase { font-size: clamp(1.17rem, 2.55vw, 4.4rem); }
 }
 .timeline-labels {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--steps, 4), minmax(0, 1fr));
   gap: .45rem;
   list-style: none;
   padding: 0;
