@@ -67,9 +67,11 @@ export function validConfig(config) {
   if (!isRecord(config)) return false;
   const { productId, name, manufacturer, method, conditions, version, temp, mode, boundaries } = config;
   if (![name, manufacturer, method, conditions, version].every(hasText)) return false;
-  if (productId === 'manual' || productId === 'refobacin' || productId === 'hi-fatigue') return mode === 'manual' && temp === null && boundaries === null;
+  if (mode === 'manual' && ['manual', 'refobacin', 'hi-fatigue'].includes(String(productId))) return temp === null && boundaries === null;
 
   const count = productId === 'pmma' && mode === 'reference' && temp === 20 ? (String(version).startsWith('composite-30s+') ? 3 : 2)
+    : productId === 'refobacin' && mode === 'reference' && [19,21,23].includes(Number(temp)) ? 4
+    : productId === 'hi-fatigue' && mode === 'reference' && [18,19,20,21,22,23].includes(Number(temp)) ? 3
     : productId === 'demo' && mode === 'demo' && isSafeNumber(temp) ? 4 : 0;
   if (!count || !Array.isArray(boundaries) || boundaries.length !== count) return false;
 

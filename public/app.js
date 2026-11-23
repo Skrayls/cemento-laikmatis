@@ -1,4 +1,4 @@
-import { PRODUCTS, resolveConfig } from './products.mjs';
+import { PRODUCTS, resolveConfig, settings } from './products.mjs';
 import { STORAGE_KEY, LEGACY_KEY, createSession, openSession, sample, phaseAt, validSession, migrateLegacy } from './timing.mjs';
 
 /**
@@ -32,7 +32,26 @@ const displayLabel = 'Laikas nuo maišymo pradžios';
 const getClock = () => ({ wall: Date.now(), mono: performance.now() });
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
+const tempSelect = /** @type {HTMLSelectElement} */ (element('temp'));
+const methodSelect = /** @type {HTMLSelectElement} */ (element('method'));
+
+const referencePhases = {
+  refobacin: {
+    Mixing: ['Maišymas', 'Maišymo pabaiga'],
+    Sticky: ['Paruošimas', 'Paruošimo pabaiga'],
+    Dough: ['Plastiška konsistencija', 'Plastiškumo pabaiga'],
+    'Final hardening': ['Kietėjimas', 'Sukietėjimo orientyras'],
+  },
+  'hi-fatigue': {
+    Mixing: ['Maišymas', 'Maišymo orientyras'],
+    'Waiting / Application': ['Laukimas / aplikavimas', 'Aplikavimo pabaigos orientyras'],
+    Hardening: ['Kietėjimas', 'Kietėjimo orientyras'],
+  },
+};
+
 function phasesFor(config) {
+  const profile = referencePhases[config.productId];
+  if (profile) return Object.values(profile).map(([title, short]) => ({title, short}));
   return config.boundaries?.length === 3 ? [mixingPhase, ...studyPhases] : studyPhases;
 }
 let draft = resolveConfig('pmma');
@@ -161,7 +180,7 @@ function renderTimeline(config, state, elapsed, index, uncertain) {
     if (current) label.setAttribute('aria-current', 'step');
     else label.removeAttribute('aria-current');
     const endTime = boundary ?? marks[i + 1];
-    setText(end, endTime === undefined ? '—' : timeText(endTime));
+    setText(end, endTime === undefined ? '—' : (config.productId === 'hi-fatigue' ? '≈ ' : '') + timeText(endTime));
   });
 }
 
@@ -179,7 +198,7 @@ function renderClock(tick = null) {
   let phaseLabel = 'Būsena';
   let modePhase = 'idle';
   let remaining = null;
-  const remainingLabel = 'Iki kito orientyro';
+  const remainingLabel = config.productId === 'hi-fatigue' ? 'Apytiksliai iki orientyro' : 'Iki kito orientyro';
   let nextTitle = '';
 
   if (uncertain) {
@@ -190,13 +209,13 @@ function renderClock(tick = null) {
   } else if (active && oldSchedule) {
     title = 'Ankstesnis ciklas · tik praėjęs laikas';
   } else if (!modeled) {
-    title = 'Tik chronometras';
+    title = 'Orientyrų nėra';
   } else {
     modePhase = String(phase.index);
     if (phase.complete) {
       title = 'Sukietėjimo orientyras pasiektas';
     } else {
-      phaseLabel = 'Orientacinė fazė';
+      phaseLabel = '';
       title = steps[phase.index].title;
       remaining = phase.remaining;
       nextTitle = steps[phase.index].short;
@@ -224,14 +243,18 @@ function renderClock(tick = null) {
 function renderControls() {
   const state = live?.state;
   const config = state?.config ?? draft;
-  const selected = PRODUCTS.find(item => item.id === config.productId);
   const active = state?.status === 'active';
   const adjustable = !state && !concurrent && !corruptRecord && !pending;
   document.body.dataset.mode = config.mode;
   document.body.dataset.running = String(active);
-  setText(element('session-mode'), selected?.reason ?? 'Rankinis režimas');
   const name = profileName(config.productId, config.name);
-  setText(element('session-config'), config.mode !== 'reference' ? name : `${name} · ${config.temp} °C`);
+  const configuration = element('configuration');
+  configuration.hidden = Boolean(state) || corruptRecord;
+  element('session-config').hidden = !configuration.hidden;
+  setText(element('session-config'), config.mode !== 'reference' ? name :
+    [name, `${config.temp} °C`, config.productId !== 'pmma' ? config.method : ''].filter(Boolean).join(' · '));
+  tempSelect.disabled = !adjustable || tempSelect.options.length < 2;
+  methodSelect.disabled = !adjustable;
   element('setup').hidden = Boolean(state) || corruptRecord;
   element('session-actions').hidden = !state && !corruptRecord;
   product.disabled = !adjustable;
@@ -358,11 +381,26 @@ async function restore() {
 await restore();
 render();
 
-product.addEventListener('change', () => {
-  if (live) return;
-  draft = resolveConfig(product.value);
+function loadOptions() {
+  const options = settings[product.value];
+  tempSelect.replaceChildren(...options.temperatures.map(temp => new Option(`${temp} °C`, String(temp))));
+  methodSelect.replaceChildren(...Object.entries(options.methods).map(([key, name]) => new Option(String(name), key)));
+  element('method-field').hidden = !methodSelect.options.length;
+}
+
+function updateDraft() {
+  if (live || pending) return;
+  draft = resolveConfig(product.value, Number(tempSelect.value), methodSelect.value || undefined);
   render();
+}
+
+loadOptions();
+product.addEventListener('change', () => {
+  loadOptions();
+  updateDraft();
 });
+tempSelect.addEventListener('change', updateDraft);
+methodSelect.addEventListener('change', updateDraft);
 
 start.addEventListener('click', async () => {
   if (live || start.disabled) return;

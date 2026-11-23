@@ -476,3 +476,12 @@ body[data-mode="reference"] #phase {
 .setup-fields { grid-template-columns: 1fr; }
 body:not([data-running="true"]) .monitor { gap: .65rem; }
 body:not([data-running="true"]) #elapsed { font-size: clamp(4rem, min(27vw, 25vh), 19rem); }
+
+.configuration { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem .75rem; }
+.configuration .field { flex: 0 1 auto; max-width: 100%; }
+.configuration select { min-height: 44px; }
+.phase-label:empty { display: none; }
+@media (max-width: 520px) {
+  .configuration { display: grid; grid-template-columns: 1fr 1fr; }
+  .configuration .field:first-child { grid-column: 1 / -1; }
+}

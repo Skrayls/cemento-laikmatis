@@ -104,31 +104,29 @@ test('cancel preserves running elapsed; abandoning and starting a new session ar
   await expect(page.locator('#start')).toBeEnabled();
 });
 
-test('manufacturer profile has no temperature field or automatic countdown', async ({ page }) => {
+test('Hi-Fatigue selectors update the approximate timeline', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
-  const productSelect = page.locator('#product');
-  await expect(productSelect).toHaveValue('pmma');
-  await productSelect.selectOption('hi-fatigue');
-  await expect(page.locator('#temperature-field')).toBeHidden();
-  await expect(page.locator('#remaining')).toBeHidden();
-  await expect(page.locator('#start')).toBeEnabled();
-  // Start manual timer
-  await page.locator('#start').click();
+  await page.locator('#product').selectOption('hi-fatigue');
+  await page.locator('#temp').selectOption('23');
+  await page.locator('#method').selectOption('manual');
+  await expect(page.locator('#timeline-labels small')).toHaveText(['≈ 00:30', '≈ 06:00', '≈ 10:00']);
+  await startTimer(page);
+  await expect(page.locator('#configuration')).toBeHidden();
   await expect(page.locator('#manual-next')).toHaveCount(0);
-  // Countdown should remain hidden in manual mode
-  await expect(page.locator('#remaining')).toBeHidden();
 });
 
-test('unsupported product stopwatch continues without phase controls', async ({ page }) => {
+test('Refobacin applies the selected historical IFU row', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
   await page.locator('#product').selectOption('refobacin');
+  await page.locator('#temp').selectOption('21');
+  await page.locator('#method').selectOption('chilledVacuum');
+  await expect(page.locator('#timeline-labels small')).toHaveText(['00:30', '04:00', '08:20', '13:45']);
   await startTimer(page);
-  await expect(page.locator('#manual-next')).toHaveCount(0);
-  await expect(page.locator('#timeline')).toBeHidden();
-  await page.clock.runFor(5_100);
-  await expect(page.getByRole('timer')).toHaveText('00:05');
+  await page.clock.runFor(30_100);
+  await expect(page.locator('#phase')).toHaveText('Paruošimas');
+  await expect(page.locator('#remaining')).toHaveText('03:30');
 });
 
 test('wall-only clock change freezes the last trustworthy elapsed and suppresses estimates', async ({ page }) => {

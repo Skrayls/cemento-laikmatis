@@ -16,7 +16,7 @@ import { MIXING_REFERENCE, SMARTSET, REFOBACIN } from './evidence.mjs';
 /**
  * @typedef {Pick<Product, 'name' | 'manufacturer' | 'method' | 'conditions' | 'version'>} ProductDetails
  * @typedef {Readonly<ProductDetails & (
- *   {productId: 'pmma', temp: number, mode: 'reference', boundaries: readonly number[]} |
+ *   {productId: 'pmma' | 'refobacin' | 'hi-fatigue', temp: number, mode: 'reference', boundaries: readonly number[]} |
  *   {productId: 'demo', temp: number, mode: 'demo', boundaries: readonly number[]} |
  *   {productId: 'manual' | 'refobacin' | 'hi-fatigue', temp: null, mode: 'manual', boundaries: null}
  * )>} Config
@@ -62,13 +62,30 @@ const catalog = [
 
 export const PRODUCTS = Object.freeze(catalog.map(product => Object.freeze(product)));
 
+// Approximate cumulative minutes read from IFU 135-0579-02, printed p. 5.
+export const HI_FATIGUE_GRAPH = Object.freeze({
+  vacuum: [[.5,1.5,7,11.5],[.5,1.5,6.5,10.5],[.5,1,6,9.5],[.5,1,5.5,9],[.5,1,5,8.5],[.5,1,4.5,8]],
+  manual: [[.5,3,8,14],[.5,2.5,7.5,13.5],[.5,2.5,7,12.5],[.5,2,6.5,11.5],[.5,2,6.5,11],[.5,2,6,10]],
+});
+
+export const settings = {
+  pmma: { temperatures: [20], methods: {} },
+  refobacin: { temperatures: REFOBACIN.temperatures, methods: {
+    vacuum: 'Vakuuminis · nešaldytas', manual: 'Rankinis · nešaldytas', chilledVacuum: 'Vakuuminis · komponentai 4 °C',
+  } },
+  'hi-fatigue': { temperatures: [18,19,20,21,22,23], methods: {
+    vacuum: 'Vakuuminis · nešaldytas', manual: 'Rankinis · nešaldytas',
+  } },
+};
+
 /**
  * Resolve a snapshot without using historical IFU rows as a schedule.
  * @param {string} productId
  * @param {number | null} [temp]
+ * @param {string} [methodKey]
  * @returns {Config}
  */
-export function resolveConfig(productId, temp) {
+export function resolveConfig(productId, temp, methodKey) {
   const product = productId === 'manual' ? legacyManual : PRODUCTS.find(entry => entry.id === productId);
   if (!product) throw new RangeError(`Unknown product: ${productId}`);
   const { name, manufacturer, method, conditions, version } = product;
@@ -78,9 +95,22 @@ export function resolveConfig(productId, temp) {
     const boundaries = Object.freeze([MIXING_REFERENCE.seconds * 1000, SMARTSET.doughing.mean * 1000, SMARTSET.setting.mean * 1000]);
     return Object.freeze({ productId, ...details, temp: SMARTSET.temperature, mode: 'reference', boundaries });
   }
-  if (productId !== 'manual' && productId !== 'refobacin' && productId !== 'hi-fatigue') {
-    throw new RangeError('Unsupported profile');
+  if (productId === 'refobacin' || productId === 'hi-fatigue') {
+    const options = settings[productId];
+    const selectedTemp = temp ?? options.temperatures[0];
+    const position = options.temperatures.indexOf(selectedTemp);
+    const key = methodKey ?? 'vacuum';
+    if (position < 0 || !Object.hasOwn(options.methods, key)) throw new RangeError('Unsupported configuration');
+    const graph = productId === 'hi-fatigue';
+    const row = graph ? HI_FATIGUE_GRAPH[key][position] : REFOBACIN.methods[key][position];
+    // The Waiting → Application boundary conflicts with the IFU text.
+    const seconds = graph ? [row[0] * 60, row[2] * 60, row[3] * 60] : row;
+    return Object.freeze({ productId, ...details, method: options.methods[key],
+      version: graph ? version + ' / graph-30s-v1' : version,
+      conditions: graph ? 'Apytiksliai grafiko orientyrai' : 'Istorinės IFU orientyrai',
+      temp: selectedTemp, mode: 'reference', boundaries: Object.freeze(seconds.map(value => value * 1000)) });
   }
+  if (productId !== 'manual') throw new RangeError('Unsupported profile');
   if (temp != null) throw new RangeError('Manual mode has no temperature');
   return Object.freeze({ productId, ...details, temp: null, mode: 'manual', boundaries: null });
 }

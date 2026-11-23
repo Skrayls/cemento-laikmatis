@@ -1,6 +1,6 @@
 # Cement research and data release status
 
-Neither manufacturer profile schedules automatic phase transitions. The historical Refobacin table is versioned reference data, not a runnable preset.
+V6 schedules informational references only: historical Refobacin table rows and rounded Hi-Fatigue G graph points with the conflicting Waiting boundary omitted.
 
 ## Bendras PMMA — SmartSet HV study
 
@@ -22,7 +22,7 @@ Antibiotic-loaded, radiopaque PMMA cement (gentamicin). The historical multiling
 
 The US graph distinguishes mixing, sticky, dough and final hardening, for vacuum mixing with non-prechilled cement. Sticky means the waiting/adhesive interval; dough is a handling phase, not an application deadline or a declaration of safety. Final hardening is a reference endpoint, not a measured material state. The historical EU IFU specifies ambient **and** component temperature at each table row; those inputs are not interchangeable with storage temperature or a midday room reading on its own.
 
-### Historical IFU Table 2 (reference only; never scheduled)
+### Historical IFU Table 2 (historical reference; scheduled in V6)
 
 Vacuum mixing, non-prechilled. Transcribed as cumulative thresholds, in seconds from the start of mixing:
 
@@ -79,7 +79,7 @@ The manufacturer-authored [Hi-Fatigue G Bone Cement IFU](https://www.boa.ac.uk/s
 - Hi-Fatigue G example: 1 × 40 g, REF 00-1121-140-01, with 0.55 g active gentamicin (0.9 g sulfate) in the stated presentation. [FDA K192379](https://www.accessdata.fda.gov/cdrh_docs/pdf19/K192379.pdf) corroborates the product and manufacturer; it does not verify these timing presets.
 - The [NHS-hosted manufacturer IFU](https://azuksappnpdsa01.blob.core.windows.net/datashare/Zimmer-Biomet-Hi-Fatigue-Bone-Cement-Instructions-for-Use-IFU.pdf) is revision 135-0579-02 (2020-04-21). English p. 5 specifies 18–23 °C for intended handling even though the plotted axis extends to 25 °C. The [Zimmer Biomet EMEA brochure](https://azuksappnpdsa01.blob.core.windows.net/datashare/Zimmer-Biomet-Hi-Fatigue-and-Optivac-Brochure.pdf) (2456.2-EMEA-en-REV0619) distinguishes Hi-Fatigue from Hi-Fatigue G. The [separate mixing chart](https://azuksappnpdsa01.blob.core.windows.net/datashare/Zimmer-Biomet-Hi-Fatigue-G-Bone-Cement-Mixing-Chart.pdf) (2004.1-OUS-en-REV0418) cites an older IFU. [NHS March 2026 supplemental guidance](https://azuksappnpdsa01.blob.core.windows.net/datashare/3261-Heraeus-Medical-Zimmer-Mixing-Guidance-13-March-2026.pdf) addresses reports of longer setting under a distinct mixing context; it is not a replacement IFU or a complete dataset.
 
-### IFU chart readings (research only; NOT in the app)
+### IFU chart readings and V6 selection
 
 Each cell lists the approximate cumulative minutes at **mixing end / waiting end / application end / right edge of the hardening band**. The right edge is a graphic reference, not a material-state measurement. The charts do not specify a sampling protocol, statistical variability, or a numerical release table tied to a particular unit count or vacuum mixer.
 
@@ -94,8 +94,10 @@ Each cell lists the approximate cumulative minutes at **mixing end / waiting end
 
 **Reproduction:** Extract the two original bitmap graphs from PDF page 3 (printed p. 5), for example by rendering that page to SVG and decoding its embedded PNGs. The BOA and NHS copies yielded identical graph images. In the vacuum plot (449 × 310), the zero and 12-minute ticks are x ≈ 39.5 and 429 px; the 18 and 25 °C lines are y ≈ 287 and 8 px. In the manual plot (469 × 310), the zero and 15-minute ticks are x ≈ 39.5 and 432.5 px; 18 and 25 °C are at y ≈ 289.5 and 8.5 px. Use the centers of the four dark strokes; sample 2–4 px above and below the gridline to avoid its gray pixels (inside the plot at 18 °C). Convert the median x of each stroke to minutes, round to the nearest half-minute, and visually cross-check the plot. At 18 °C edge effects and at all rows pixel/line thickness add uncertainty beyond the rounding half-step (15 s); this is not an error bound on actual timing.
 
-**Internal inconsistency:** The IFU describes about 30 s mixing for both methods and a general 1–2 min resting period **after** mixing (p. 6). Some vacuum plot waiting intervals read shorter than that, while some low-temperature manual intervals read longer. This is not resolved by rounding or by averaging prose and plots. The IFU also defines waiting and application endpoints by material behavior, not a timer. The 2018 chart and 2026 alternate guidance must not be spliced into this dataset. Before activation, obtain the current market/REF IFU and matching mixing-system instructions and have the manufacturer resolve the timing interpretation. No data is extrapolated to 24–25 °C or applied to prechilled material.
+**Internal inconsistency:** The IFU describes about 30 s mixing for both methods and a general 1–2 min resting period **after** mixing (p. 6). Some vacuum plot waiting intervals read shorter than that, while some low-temperature manual intervals read longer. This is not resolved by rounding or by averaging prose and plots. The IFU also defines waiting and application endpoints by material behavior, not a timer. The 2018 chart and 2026 alternate guidance must not be spliced into this dataset. Before treating these references as applicable to a clinical configuration, obtain the current market/REF IFU and matching mixing-system instructions and have the manufacturer resolve the timing interpretation. No data is extrapolated to 24–25 °C or applied to prechilled material.
 
 ### Lithuanian display terminology
 
 Refobacin: Mixing → Maišymas; Sticky → Paruošimas; Dough → Plastiška konsistencija; Final hardening → Kietėjimas. Hi-Fatigue G: Mixing → Maišymas; Waiting → Laukimo fazė; Application → Aplikavimo fazė; Hardening → Kietėjimas. SmartSet HV: Doughing time → plastiškos konsistencijos kriterijus; Working time → darbinės fazės trukmė (interval only); Setting time → sukietėjimo laikas. Dough and Working are not interchangeable.
+
+V6 uses the first (about 30 s), third and fourth graph points for Hi-Fatigue G. Between the first and third points the app shows a combined interval, not an Application start estimate. The display counts down to rounded references, not to predicted material-state changes. No interpolation.
