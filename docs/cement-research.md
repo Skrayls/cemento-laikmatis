@@ -4,7 +4,7 @@ Neither manufacturer profile schedules automatic phase transitions. The historic
 
 ## Bendras PMMA — SmartSet HV study
 
-[Study and Table 1](https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/): manually bowl-mixed control at 20 °C and 50% relative humidity. Mean ± sample standard deviation, in seconds from mixing start: ASTM doughing criterion 148 ± 7; setting, at the midpoint of the rising exotherm, 534 ± 17. Working time 386 ± 21 is the measured difference between those endpoints, not a third endpoint. No mixing-end milestone or temperature correction is derived. Neither criterion establishes readiness, a safe application window or completed clinical hardening.
+[Study and Table 1](https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/): manually bowl-mixed control at 20 °C and 50% relative humidity. Mean ± sample standard deviation, in seconds from mixing start: ASTM doughing criterion 148 ± 7; setting, at the midpoint of the rising exotherm, 534 ± 17. Working time 386 ± 21 is the measured difference between those endpoints, not a third endpoint. No mixing-end milestone or temperature correction is derived from SmartSet HV. The V5 30-second reference is independently sourced from Heraeus PALACADEMY, Cement handling, p. 10 (30 seconds unless otherwise recommended), not a SmartSet HV observation. The SmartSet HV protocol used 15 seconds of manual mixing. The composite is not a single product protocol. Neither criterion establishes readiness, a safe application window or completed clinical hardening.
 
 ## Refobacin Bone Cement R — Zimmer Biomet
 

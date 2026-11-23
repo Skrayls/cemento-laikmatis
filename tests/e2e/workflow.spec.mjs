@@ -20,23 +20,26 @@ test('literature reference starts at zero, shows fixed study temperature, and st
   await freezeClock(page);
   await page.goto('/');
   const timer = page.getByRole('timer');
-  await expect(timer).toBeHidden();
+  await expect(timer).toBeVisible();
+  await expect(timer).toHaveText('00:00');
+  expect((await timer.boundingBox()).y).toBeLessThan((await page.locator('#product').boundingBox()).y);
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.locator('#start')).toBeEnabled();
 
   await startTimer(page);
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page.locator('#product')).toBeHidden();
-  await expect(page.locator('#phase')).toHaveText(/iki orientyro/i);
+  await expect(page.locator('#phase')).toHaveText(/^maišymas$/i);
   await expect(page.locator('#session-config')).toHaveText(/20\s*°C/);
   await page.clock.runFor(1_100);
   await expect(timer).toHaveText('00:01');
-  await expect(page.locator('#remaining')).toHaveText('02:27');
+  await expect(page.locator('#remaining')).toHaveText('00:29');
 
   // A long gap with advancing monotonic and system clocks models throttled callbacks.
   await page.clock.fastForward(30 * 60_000);
   await page.clock.runFor(100);
   await expect(timer).toHaveText('30:01');
-  await expect(page.locator('#phase')).toHaveText(/paskutinis orientyras pasiektas/i);
+  await expect(page.locator('#phase')).toHaveText(/sukietėjimo orientyras pasiektas/i);
   await expect(page.locator('#remaining')).not.toHaveText(/-/);
   await page.clock.runFor(1_100);
   await expect(timer).toHaveText('30:02');
@@ -96,7 +99,7 @@ test('cancel preserves running elapsed; abandoning and starting a new session ar
 
   await page.locator('#new-session').click();
   if (await dialog.isVisible()) await page.locator('#confirm-yes').click();
-  await expect(timer).toBeHidden();
+  await expect(timer).toBeVisible();
   await expect(page.locator('#start')).toBeVisible();
   await expect(page.locator('#start')).toBeEnabled();
 });
@@ -112,29 +115,19 @@ test('manufacturer profile has no temperature field or automatic countdown', asy
   await expect(page.locator('#start')).toBeEnabled();
   // Start manual timer
   await page.locator('#start').click();
-  await expect(page.locator('#manual-next')).toBeVisible();
+  await expect(page.locator('#manual-next')).toHaveCount(0);
   // Countdown should remain hidden in manual mode
   await expect(page.locator('#remaining')).toBeHidden();
 });
 
-test('manual final marker records the phase without stopping elapsed', async ({ page }) => {
+test('unsupported product stopwatch continues without phase controls', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
   await page.locator('#product').selectOption('refobacin');
-  await expect(page.locator('#temperature-field')).toBeHidden();
-  await expect(page.locator('#start')).toBeEnabled();
-  await page.locator('#start').click();
-  await expect(page.getByRole('timer')).toHaveText('00:00');
-  const mark = page.locator('#manual-next');
-  for (let index = 0; index < 4; index++) {
-    // Sample away from the exact successive second so the displayed floor is
-    // independent of the browser's frame scheduling at the boundary.
-    await page.clock.runFor(1_100);
-    await mark.click();
-  }
-  await expect(mark).toBeHidden();
-  await expect(page.getByRole('timer')).toHaveText('00:04');
-  await page.clock.runFor(1_100);
+  await startTimer(page);
+  await expect(page.locator('#manual-next')).toHaveCount(0);
+  await expect(page.locator('#timeline')).toBeHidden();
+  await page.clock.runFor(5_100);
   await expect(page.getByRole('timer')).toHaveText('00:05');
 });
 
@@ -196,7 +189,7 @@ test('pre-cached app reloads offline and can start a new timer while disconnecte
   await startTimer(page);
   await page.clock.runFor(2_100);
   await expect(page.getByRole('timer')).toHaveText('00:02');
-  await expect(page.locator('#phase')).toHaveText(/iki orientyro/i);
+  await expect(page.locator('#phase')).toHaveText(/^maišymas$/i);
   await page.reload();
   await expect(page.locator('#notice')).toHaveText(/atkurt/i);
   await expect(page.getByRole('timer')).toHaveText('00:02');
@@ -303,11 +296,11 @@ for (const viewport of [
       await page.goto('/');
       await startTimer(page);
       const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('pmma').boundaries);
-      const workingSample = ends[0] + 5_000;
+      const workingSample = ends[1] + 5_000;
       await page.clock.fastForward(workingSample);
       await page.clock.runFor(100);
       await expect(page.getByRole('timer')).not.toHaveText('00:00');
-      await expect(page.locator('#phase')).toHaveText(/po orientyro/i);
+      await expect(page.locator('#phase')).toHaveText(/plastiška konsistencija/i);
       await expect(page.locator('#phase')).toBeInViewport();
       await expect(page.locator('#timeline')).toBeInViewport({ ratio: 0.9 });
       const geometry = await page.evaluate(() => {
@@ -343,7 +336,7 @@ for (const viewport of [
 
       await page.clock.fastForward(ends.at(-1));
       await page.clock.runFor(100);
-      await expect(page.locator('#phase')).toHaveText(/paskutinis orientyras pasiektas/i);
+      await expect(page.locator('#phase')).toHaveText(/sukietėjimo orientyras pasiektas/i);
       await expect(page.locator('#timeline')).toBeInViewport({ ratio: 0.9 });
       expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
     });
@@ -357,17 +350,17 @@ test('the segmented timeline is proportional and advances with elapsed time', as
   await startTimer(page);
   const durations = ends.map((end, index) => end - (ends[index - 1] ?? 0));
   const segments = page.locator('.timeline-segment');
-  await expect(segments).toHaveCount(2);
+  await expect(segments).toHaveCount(3);
   const widths = await segments.evaluateAll(elements => {
     return elements.map(segment => segment.getBoundingClientRect().width);
   });
-  expect(widths).toHaveLength(2);
+  expect(widths).toHaveLength(3);
   const width = widths.reduce((sum, part) => sum + part, 0);
   widths.forEach((part, index) => expect(part / width).toBeCloseTo(durations[index] / ends.at(-1), 2));
   const marker = page.locator('#timeline-marker');
   const zero = await marker.boundingBox();
-  await page.clock.runFor(ends[0] + 250);
-  await expect(page.locator('#phase')).toHaveText(/po orientyro/i);
+  await page.clock.runFor(ends[1] + 250);
+  await expect(page.locator('#phase')).toHaveText(/plastiška konsistencija/i);
   const atFirstBoundary = await marker.boundingBox();
   expect(atFirstBoundary.x).toBeGreaterThan(zero.x);
 });

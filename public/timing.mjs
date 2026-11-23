@@ -69,7 +69,7 @@ export function validConfig(config) {
   if (![name, manufacturer, method, conditions, version].every(hasText)) return false;
   if (productId === 'manual' || productId === 'refobacin' || productId === 'hi-fatigue') return mode === 'manual' && temp === null && boundaries === null;
 
-  const count = productId === 'pmma' && mode === 'reference' && temp === 20 ? 2
+  const count = productId === 'pmma' && mode === 'reference' && temp === 20 ? (String(version).startsWith('composite-30s+') ? 3 : 2)
     : productId === 'demo' && mode === 'demo' && isSafeNumber(temp) ? 4 : 0;
   if (!count || !Array.isArray(boundaries) || boundaries.length !== count) return false;
 

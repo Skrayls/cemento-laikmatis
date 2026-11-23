@@ -24,14 +24,14 @@
 
   <main>
     <section class="monitor" aria-label="Laikmačio rodinys">
-      <div class="session-heading">
-        <p id="session-mode" class="mode">Literatūros orientyras</p>
-        <p id="session-config">Bendras PMMA · 20 °C</p>
-      </div>
-
       <div class="clock">
         <p id="clock-label" class="clock-label">Laikas nuo maišymo pradžios</p>
         <div id="elapsed" role="timer" aria-labelledby="clock-label">00:00</div>
+      </div>
+
+      <div class="session-heading">
+        <p id="session-mode" class="mode">Sudėtinis orientyras</p>
+        <p id="session-config">Bendras PMMA · 20 °C</p>
       </div>
 
       <p id="notice" class="notice" role="status" hidden></p>
@@ -68,16 +68,14 @@
               <select id="product"></select>
             </label>
 
-            <p id="method" class="method"></p>
           </div>
 
           <div class="setup-actions">
-            <button id="start" aria-describedby="method" type="button" class="primary" disabled>Pradėti maišymą</button>
+            <button id="start" type="button" class="primary" disabled>Pradėti maišymą</button>
           </div>
         </div>
 
         <div id="session-actions" class="session-actions" hidden>
-          <button id="manual-next" type="button" class="primary" hidden></button>
           <button id="abandon" type="button" class="quiet" hidden>Anuliuoti ciklą</button>
           <button id="new-session" type="button" class="quiet" hidden>Naujas ciklas</button>
         </div>
@@ -90,8 +88,8 @@
       <summary>Šaltiniai ir metodika</summary>
       <div class="source-content">
         <p>Skirta darbo eigai įvertinti. Tai nėra validuota medicinos priemonė. Laikmatis nenustato, ar cementas sukietėjo, ir nenurodo saugaus implantavimo intervalo. Vadovaukitės konkretaus produkto galiojančia instrukcija ir operacinės protokolu.</p>
-        <p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/">„SmartSet HV“ tyrimas</a>: 20 °C, 50 % santykinė drėgmė, rankinis maišymas dubenyje. Nuo maišymo pradžios: plastiškos konsistencijos kriterijus (Doughing time) 148 ± 7 s, laboratorinis sukietėjimo laikas (Setting time) 534 ± 17 s (vidurkiai ± standartinis nuokrypis). 386 ± 21 s yra intervalas tarp šių taškų. Maišymo pabaigai atskiras orientyras netaikomas.</p>
-        <p>„Refobacin“ duomenys dokumentuoti istorinėje IFU 9878300010, indeksas 03, 2018-05; taikymas Lietuvoje nepatvirtintas. „Hi-Fatigue G“ IFU grafiko ir teksto laukimo ribos nesuderintos. Abiem produktams prieinamas chronometras su rankinėmis žymomis.</p>
+        <p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/">„SmartSet HV“ tyrimas</a>: 20 °C, 50 % santykinė drėgmė, rankinis maišymas dubenyje. Nuo maišymo pradžios: plastiškos konsistencijos kriterijus (Doughing time) 148 ± 7 s, laboratorinis sukietėjimo laikas (Setting time) 534 ± 17 s (vidurkiai ± standartinis nuokrypis). 386 ± 21 s yra intervalas tarp šių taškų. Tyrime maišyta rankomis 15 s. Atskiras 30 s maišymo orientyras paimtas iš <a href="https://www.heraeus-medical.com/dam/jcr:e6ff3322-293f-4558-9aaa-0b6093dedf74/palacademy-cement-handling-mixing-phase-p10.pdf">„Heraeus PALACADEMY“, 10 psl.</a>, ne iš „SmartSet HV“ tyrimo.</p>
+        <p>„Refobacin“ duomenys dokumentuoti istorinėje IFU 9878300010, indeksas 03, 2018-05; taikymas Lietuvoje nepatvirtintas. „Hi-Fatigue G“ IFU grafiko ir teksto laukimo ribos nesuderintos. Abiem produktams prieinamas tik chronometras.</p>
         <ul>
           <li><a href="https://www.zimmerbiomet.com/content/dam/zb-corporate/en/products/specialties/cement/refobacin-bone-cement-r/16361USenBiometBCRandRefobacinBCRProductSheetdigital.pdf#page=2" target="_blank" rel="noopener">„Zimmer Biomet“ maišymo grafikas, produkto aprašo 2 psl.</a>: iš anksto nešaldytas cementas, maišymas vakuume.</li>
           <li><a href="https://www.zimmerbiomet.com/en/products-and-solutions/specialties/cement/refobacin-bone-cement-r.html" target="_blank" rel="noopener">„Refobacin Bone Cement R“ produkto informacija</a></li>
@@ -101,7 +99,6 @@
         <p>Ciklas saugomas šiame naršyklės profilyje; tarp įrenginių nesinchronizuojamas.</p>
       </div>
     </details>
-    <p>Vertinimui · Ne klinikiniams sprendimams</p>
   </footer>
 
   <dialog id="confirm-action" aria-labelledby="confirm-title" aria-describedby="confirm-body">

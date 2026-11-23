@@ -10,7 +10,7 @@ test('SmartSet means and standard deviations are separate statistics', () => {
   assert.deepEqual(SMARTSET.working, { mean: 386, sd: 21 });
   const config = resolveConfig('pmma');
   assert.ok(validConfig(config));
-  assert.deepEqual(config.boundaries, [148000, 534000]);
+  assert.deepEqual(config.boundaries, [30000, 148000, 534000]);
   assert.equal(phaseAt(config, 148000).remaining, 386000);
   for (const temperature of [19, 21, 23]) assert.throws(() => resolveConfig('pmma', temperature));
 });
