@@ -11,7 +11,6 @@ function element(id) {
 }
 
 const product = /** @type {HTMLSelectElement} */ (element('product'));
-const conditions = /** @type {HTMLInputElement} */ (element('conditions'));
 const start = /** @type {HTMLButtonElement} */ (element('start'));
 const abandon = /** @type {HTMLButtonElement} */ (element('abandon'));
 const newSession = /** @type {HTMLButtonElement} */ (element('new-session'));
@@ -193,7 +192,7 @@ function renderClock(tick = null) {
   let phaseLabel = 'Būsena';
   let modePhase = 'idle';
   let remaining = null;
-  let remainingLabel = 'Iki tešlos orientyro';
+  const remainingLabel = 'Iki kito orientyro';
   let nextTitle = '';
 
   if (uncertain) {
@@ -211,10 +210,9 @@ function renderClock(tick = null) {
       phaseLabel = reference ? 'Tyrimo orientyras' : 'Paskutinė pažymėta fazė';
       title = steps[phase.index].title;
       remaining = phase.remaining;
-      remainingLabel = phase.index === 0 ? 'Iki tešlos orientyro' : 'Iki sukietėjimo orientyro';
-      if (phase.index < steps.length - 1) {
-        const nextLabel = modeled ? 'Toliau' : 'Kita žyma';
-        nextTitle = `${nextLabel}: ${(reference ? steps[phase.index + 1].short : steps[phase.index + 1].title).toLocaleLowerCase('lt')}`;
+      if (reference) nextTitle = steps[phase.index].short;
+      else if (phase.index < steps.length - 1) {
+        nextTitle = `Kita žyma: ${steps[phase.index + 1].title.toLocaleLowerCase('lt')}`;
       }
     }
   } else if (modeled) {
@@ -255,13 +253,10 @@ function renderControls() {
   element('setup').hidden = Boolean(state) || corruptRecord;
   element('session-actions').hidden = !state && !corruptRecord;
   product.disabled = !adjustable;
-  conditions.disabled = !adjustable;
-  setText(element('conditions-label'), modeled
-    ? 'Suprantu, kad tyrimo orientyrai nenustato cemento parengties.'
-    : 'Etapus žymėsiu rankiniu būdu pagal taikomą instrukciją.');
-  setText(element('method'), modeled ? `${config.method} · ${config.conditions}`
-    : 'Chronometras be automatinių fazių perėjimų.');
-  start.disabled = !adjustable || !conditions.checked;
+  setText(element('method'), modeled ? `Tyrimo sąlygos: ${config.conditions}`
+    : 'Fazes žymėkite rankiniu būdu pagal taikomą instrukciją.');
+  start.disabled = !adjustable;
+  document.body.classList.toggle('is-ready', adjustable);
   abandon.hidden = !active;
   abandon.disabled = concurrent || pending;
   newSession.hidden = !corruptRecord && (!state || active);
@@ -393,10 +388,8 @@ render();
 product.addEventListener('change', () => {
   if (live) return;
   draft = resolveConfig(product.value);
-  conditions.checked = false;
   render();
 });
-conditions.addEventListener('change', renderControls);
 
 start.addEventListener('click', async () => {
   if (live || start.disabled) return;
@@ -409,7 +402,6 @@ start.addEventListener('click', async () => {
     const id = crypto.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint32Array(4)), part => part.toString(16)).join('-');
     live = openSession(createSession(draft, now, id), now, false);
     save(live.state);
-    conditions.checked = false;
   }
   pending = false;
   render();
@@ -514,7 +506,6 @@ dialog.addEventListener('close', async () => {
     if (cleared || (!concurrent && noStoredSession())) {
       live = null;
       corruptRecord = false;
-      conditions.checked = false;
       storageNote = '';
     } else if (!concurrent) {
       storageNote = 'Įrašo išvalyti nepavyko; naujas ciklas nepradėtas.';
@@ -523,7 +514,7 @@ dialog.addEventListener('close', async () => {
   }
   pending = false;
   render();
-  const target = live || corruptRecord ? newSession : conditions;
+  const target = live || corruptRecord ? newSession : start;
   if (!target.hidden && !target.disabled) target.focus();
 });
 

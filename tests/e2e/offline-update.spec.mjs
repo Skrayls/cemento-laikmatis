@@ -53,7 +53,6 @@ test('a new offline release waits and does not change an active client’s asset
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     await page.reload();
     expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
-    await page.locator('#conditions').check();
     await page.locator('#start').click();
     await expect(page.locator('body')).toHaveAttribute('data-running', 'true');
 
