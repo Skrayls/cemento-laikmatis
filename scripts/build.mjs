@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -15,6 +16,12 @@ const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const assets = Object.fromEntries(await Promise.all(staticAssets.map(async (asset) => {
   return [asset, await readFile(join(source, asset))];
 })));
+const commit = execFileSync('git', ['rev-parse', '--short=12', 'HEAD'], {
+  cwd: root, encoding: 'utf8',
+}).trim();
+assets['index.html'] = Buffer.from(assets['index.html'].toString('utf8').replace(
+  'Cement Timer PRO V7 · build dev', `Cement Timer PRO V7 · build ${commit}`,
+));
 const checksums = Object.fromEntries(Object.entries(assets).map(([asset, bytes]) => [asset, sha256(bytes)]));
 const workerTemplate = await readFile(join(root, 'scripts/sw-template.js'), 'utf8');
 const headers = await readFile(join(source, '_headers'));

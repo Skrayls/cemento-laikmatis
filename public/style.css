@@ -498,3 +498,19 @@ body {
   main { margin-block: 0 auto; }
   .monitor { gap: .65rem; }
 }
+
+.reference-temp {
+  margin: 0;
+  align-self: end;
+  color: var(--muted);
+  font-size: .9rem;
+}
+.timeline-track { min-height: 16px; }
+.timeline-marker { width: 5px; }
+.timeline-segment.is-current { background: color-mix(in srgb, var(--segment-color) 40%, var(--line)); }
+.timeline-label strong { overflow-wrap: break-word; }
+@media (orientation: portrait) and (max-width: 520px) {
+  .configuration .reference-temp { grid-column: 1 / -1; }
+  .timeline-label { font-size: .85rem; }
+  .timeline-labels:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
