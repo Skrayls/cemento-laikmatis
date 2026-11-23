@@ -26,7 +26,7 @@ test('literature reference starts at zero, shows fixed study temperature, and st
   await startTimer(page);
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page.locator('#product')).toBeHidden();
-  await expect(page.locator('#phase')).toHaveText(/iki tešlos orientyro/i);
+  await expect(page.locator('#phase')).toHaveText(/iki plastiškumo orientyro/i);
   await expect(page.locator('#session-config')).toHaveText(/20\s*°C/);
   await page.clock.runFor(1_100);
   await expect(timer).toHaveText('00:01');
@@ -196,7 +196,7 @@ test('pre-cached app reloads offline and can start a new timer while disconnecte
   await startTimer(page);
   await page.clock.runFor(2_100);
   await expect(page.getByRole('timer')).toHaveText('00:02');
-  await expect(page.locator('#phase')).toHaveText(/iki tešlos orientyro/i);
+  await expect(page.locator('#phase')).toHaveText(/iki plastiškumo orientyro/i);
   await page.reload();
   await expect(page.locator('#notice')).toHaveText(/atkurt/i);
   await expect(page.getByRole('timer')).toHaveText('00:02');
@@ -307,7 +307,7 @@ for (const viewport of [
       await page.clock.fastForward(workingSample);
       await page.clock.runFor(100);
       await expect(page.getByRole('timer')).not.toHaveText('00:00');
-      await expect(page.locator('#phase')).toHaveText(/po tešlos orientyro/i);
+      await expect(page.locator('#phase')).toHaveText(/po plastiškumo orientyro/i);
       await expect(page.locator('#phase')).toBeInViewport();
       await expect(page.locator('#timeline')).toBeInViewport({ ratio: 0.9 });
       const geometry = await page.evaluate(() => {
@@ -367,7 +367,7 @@ test('the segmented timeline is proportional and advances with elapsed time', as
   const marker = page.locator('#timeline-marker');
   const zero = await marker.boundingBox();
   await page.clock.runFor(ends[0] + 250);
-  await expect(page.locator('#phase')).toHaveText(/po tešlos orientyro/i);
+  await expect(page.locator('#phase')).toHaveText(/po plastiškumo orientyro/i);
   const atFirstBoundary = await marker.boundingBox();
   expect(atFirstBoundary.x).toBeGreaterThan(zero.x);
 });
