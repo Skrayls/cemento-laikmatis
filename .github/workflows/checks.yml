@@ -27,3 +27,69 @@ jobs:
           path: |
             playwright-report/
             test-results/
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: pages-dist
+          path: dist/
+          if-no-files-found: error
+          overwrite: true
+
+  deploy:
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://openclaw-cemento-laikmatis.pages.dev/
+    concurrency:
+      group: cloudflare-pages-production
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: pages-dist
+          path: dist/
+      - name: Install Wrangler
+        run: npm install --prefix "$RUNNER_TEMP/pages-cli" wrangler@4.166.0
+      - name: Check current main
+        id: main
+        shell: bash
+        run: |
+          tip=$(git ls-remote --exit-code "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" refs/heads/main | cut -f1)
+          [[ "$tip" =~ ^[0-9a-f]{40}$ ]]
+          if [[ "$tip" == "$GITHUB_SHA" ]]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping stale deployment: $GITHUB_SHA is no longer main."
+          fi
+      - name: Publish tested build
+        if: steps.main.outputs.current == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          : "${CLOUDFLARE_ACCOUNT_ID:?Set the production environment variable CLOUDFLARE_ACCOUNT_ID}"
+          : "${CLOUDFLARE_API_TOKEN:?Set the production environment secret CLOUDFLARE_API_TOKEN}"
+          "$RUNNER_TEMP/pages-cli/node_modules/.bin/wrangler" pages deploy dist \
+            --project-name=openclaw-cemento-laikmatis --branch=main \
+            --commit-hash="$GITHUB_SHA" --commit-dirty=false
+      - name: Verify live build
+        if: steps.main.outputs.current == 'true'
+        run: |
+          for attempt in {1..20}; do
+            if curl --fail --silent --show-error --max-time 10 \
+              "https://openclaw-cemento-laikmatis.pages.dev/?deployment=$GITHUB_SHA" \
+              -o "$RUNNER_TEMP/pages-live.html" && cmp -s dist/index.html "$RUNNER_TEMP/pages-live.html"; then
+              echo "Production index matches the tested build for $GITHUB_SHA."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Production did not serve the tested index.html."
+          exit 1
