@@ -497,8 +497,4 @@ body {
 @media (orientation: portrait) and (max-width: 520px) {
   main { margin-block: 0 auto; }
   .monitor { gap: .65rem; }
-  .configuration:has(#method-field[hidden]) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .configuration:has(#method-field[hidden]) .field:first-child { grid-column: auto; }
 }
