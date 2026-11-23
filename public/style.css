@@ -483,7 +483,7 @@ body:not([data-running="true"]) #elapsed { font-size: clamp(4rem, min(27vw, 25vh
 .phase-label:empty { display: none; }
 @media (max-width: 520px) {
   .configuration { display: grid; grid-template-columns: 1fr 1fr; }
-  .configuration .field:first-child { grid-column: 1 / -1; }
+  .configuration :is(.field:first-child, #method-field) { grid-column: 1 / -1; }
 }
 
 body {
@@ -493,6 +493,9 @@ body {
 .configuration { max-width: 58rem; }
 .configuration .field { min-width: 0; }
 .configuration select { text-overflow: ellipsis; }
+@media (max-width: 360px) {
+  .configuration #method { font-size: .82rem; }
+}
 .timeline-label strong { overflow-wrap: anywhere; }
 @media (orientation: portrait) and (max-width: 520px) {
   main { margin-block: 0 auto; }
