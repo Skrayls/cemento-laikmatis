@@ -71,6 +71,7 @@ export function validConfig(config) {
 
   const count = productId === 'pmma' && mode === 'reference' && temp === 20 ? (String(version).startsWith('composite-30s+') ? 3 : 2)
     : productId === 'refobacin' && mode === 'reference' && [19,21,23].some(point => point === temp) ? 4
+    : (productId === 'palacos-r' || productId === 'bonos-genta') && mode === 'reference' && [19,21,23].some(point => point === temp) ? 4
     : productId === 'hi-fatigue' && mode === 'reference' && [18,19,20,21,22,23].some(point => point === temp) ? 3
     : productId === 'demo' && mode === 'demo' && isSafeNumber(temp) ? 4 : 0;
   if (!count || !Array.isArray(boundaries) || boundaries.length !== count) return false;

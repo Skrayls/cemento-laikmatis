@@ -34,10 +34,11 @@ test('storage keys use the current and legacy browser contracts', () => {
   assert.equal(LEGACY_KEY, 'cemento-laikmatis-v1');
 });
 
-test('catalog offers one literature profile and two manufacturer reference profiles', () => {
+test('catalog offers one literature profile and four manufacturer reference profiles', () => {
   assert.deepEqual(PRODUCTS.map(({ id, status, temperatures }) => [id, status, temperatures]), [
     ['pmma', 'reference', []],
     ['refobacin', 'manual', []], ['hi-fatigue', 'manual', []],
+    ['palacos-r', 'reference', [19, 21, 23]], ['bonos-genta', 'reference', [19, 21, 23]],
   ]);
   const [, refobacin, hiFatigue] = PRODUCTS;
   assert.equal(refobacin.name, 'Refobacin Bone Cement R');
@@ -311,4 +312,14 @@ test('legacy migration rejects missing, unsafe, or inconsistent fields', () => {
     { startedAt: WALL, marks: [0], finishedAt: Infinity },
     { startedAt: Number.MAX_SAFE_INTEGER, marks: [0, 1], finishedAt: null },
   ]) assert.equal(migrateLegacy(value), null);
+});
+
+test('additional manufacturer charts resolve only supported method and temperature pairs', () => {
+  assert.deepEqual(resolveConfig('palacos-r', 21, 'chilledVacuum').boundaries, [30, 105, 375, 570].map(s => s * 1000));
+  assert.deepEqual(resolveConfig('bonos-genta', 21, 'manual').boundaries, [30, 120, 450, 660].map(s => s * 1000));
+  for (const id of ['palacos-r', 'bonos-genta']) {
+    assert.match(resolveConfig(id).version, /graph-v1/);
+    assert.throws(() => resolveConfig(id, 22), /Unsupported configuration/);
+  }
+  assert.throws(() => resolveConfig('bonos-genta', 21, 'chilledVacuum'), /Unsupported configuration/);
 });

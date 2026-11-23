@@ -397,6 +397,8 @@ test('automated accessibility: setup and active screen', async ({ page }) => {
 for (const [profile, methods, temperatures] of [
   ['refobacin', ['vacuum', 'manual', 'chilledVacuum'], [19, 21, 23]],
   ['hi-fatigue', ['vacuum', 'manual'], [18, 19, 20, 21, 22, 23]],
+  ['palacos-r', ['vacuum', 'manual', 'chilledVacuum'], [19, 21, 23]],
+  ['bonos-genta', ['vacuum', 'manual'], [19, 21, 23]],
 ]) {
   for (const method of methods) for (const temp of temperatures) {
     test(`${profile}: ${method} at ${temp} °C reaches every boundary`, async ({ page }) => {

@@ -1,4 +1,4 @@
-import { MIXING_REFERENCE, SMARTSET, REFOBACIN } from './evidence.mjs';
+import { MIXING_REFERENCE, SMARTSET, REFOBACIN, ADDITIONAL_REFERENCES, ADDITIONAL_TEMPERATURES } from './evidence.mjs';
 
 /**
  * @typedef {object} Product
@@ -16,7 +16,7 @@ import { MIXING_REFERENCE, SMARTSET, REFOBACIN } from './evidence.mjs';
 /**
  * @typedef {Pick<Product, 'name' | 'manufacturer' | 'method' | 'conditions' | 'version'>} ProductDetails
  * @typedef {Readonly<ProductDetails & (
- *   {productId: 'pmma' | 'refobacin' | 'hi-fatigue', temp: number, mode: 'reference', boundaries: readonly number[]} |
+ *   {productId: 'pmma' | 'refobacin' | 'hi-fatigue' | 'palacos-r' | 'bonos-genta', temp: number, mode: 'reference', boundaries: readonly number[]} |
  *   {productId: 'demo', temp: number, mode: 'demo', boundaries: readonly number[]} |
  *   {productId: 'manual' | 'refobacin' | 'hi-fatigue', temp: null, mode: 'manual', boundaries: null}
  * )>} Config
@@ -60,6 +60,12 @@ const catalog = [
   },
 ];
 
+for (const [id, reference] of Object.entries(ADDITIONAL_REFERENCES)) {
+  const { name, manufacturer, version, conditions } = reference;
+  catalog.push({ id, name, manufacturer, version, conditions, method: 'Nenurodytas',
+    temperatures: ADDITIONAL_TEMPERATURES, status: 'reference', reason: 'Apytiksliai gamintojo grafiko orientyrai' });
+}
+
 export const PRODUCTS = Object.freeze(catalog.map(product => Object.freeze(product)));
 
 // Approximate cumulative minutes read from IFU 135-0579-02, printed p. 5.
@@ -69,6 +75,12 @@ export const HI_FATIGUE_GRAPH = Object.freeze({
 });
 
 export const settings = {
+  'palacos-r': { temperatures: ADDITIONAL_TEMPERATURES, methods: {
+    vacuum: 'Vakuuminis · nešaldytas', manual: 'Rankinis · nešaldytas', chilledVacuum: 'Vakuuminis · komponentai 4–7 °C',
+  } },
+  'bonos-genta': { temperatures: ADDITIONAL_TEMPERATURES, methods: {
+    vacuum: 'Vakuuminis · nešaldytas', manual: 'Rankinis · nešaldytas',
+  } },
   pmma: { temperatures: [20], methods: {} },
   refobacin: { temperatures: REFOBACIN.temperatures, methods: {
     vacuum: 'Vakuuminis · nešaldytas', manual: 'Rankinis · nešaldytas', chilledVacuum: 'Vakuuminis · komponentai 4 °C',
@@ -109,6 +121,15 @@ export function resolveConfig(productId, temp, methodKey) {
       version: graph ? version + ' / graph-30s-v1' : version,
       conditions: graph ? 'Apytiksliai grafiko orientyrai' : 'Istorinės IFU orientyrai',
       temp: selectedTemp, mode: 'reference', boundaries: Object.freeze(seconds.map(value => value * 1000)) });
+  }
+  if (productId === 'palacos-r' || productId === 'bonos-genta') {
+    const selectedTemp = temp ?? ADDITIONAL_TEMPERATURES[1];
+    const position = ADDITIONAL_TEMPERATURES.indexOf(selectedTemp);
+    const key = methodKey ?? 'vacuum';
+    const { methods } = ADDITIONAL_REFERENCES[productId];
+    if (position < 0 || !Object.hasOwn(methods, key)) throw new RangeError('Unsupported configuration');
+    return Object.freeze({ productId, ...details, method: settings[productId].methods[key],
+      temp: selectedTemp, mode: 'reference', boundaries: Object.freeze(methods[key][position].map(value => value * 1000)) });
   }
   if (productId !== 'manual') throw new RangeError('Unsupported profile');
   if (temp != null) throw new RangeError('Manual mode has no temperature');

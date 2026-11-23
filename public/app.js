@@ -49,7 +49,19 @@ const referencePhases = {
   },
 };
 
+const graphPhases = [
+  { title: 'Maišymas', short: 'Maišymo pabaiga' },
+  { title: 'Laukimo fazė', short: 'Laukimo pabaiga' },
+  { title: 'Aplikavimo fazė', short: 'Aplikavimo pabaiga' },
+  { title: 'Kietėjimas', short: 'Sukietėjimo orientyras' },
+];
+
+function approximate(config) {
+  return ['hi-fatigue', 'palacos-r', 'bonos-genta'].includes(config.productId);
+}
+
 function phasesFor(config) {
+  if (config.productId === 'palacos-r' || config.productId === 'bonos-genta') return graphPhases;
   const profile = referencePhases[config.productId];
   if (profile) return Object.values(profile).map(([title, short]) => ({title, short}));
   return config.boundaries?.length === 3 ? [mixingPhase, ...studyPhases] : studyPhases;
@@ -180,7 +192,7 @@ function renderTimeline(config, state, elapsed, index, uncertain) {
     if (current) label.setAttribute('aria-current', 'step');
     else label.removeAttribute('aria-current');
     const endTime = boundary ?? marks[i + 1];
-    setText(end, endTime === undefined ? '—' : (config.productId === 'hi-fatigue' ? '≈ ' : '') + timeText(endTime));
+    setText(end, endTime === undefined ? '—' : (approximate(config) ? '≈ ' : '') + timeText(endTime));
   });
 }
 
@@ -197,7 +209,7 @@ function renderClock(tick = null) {
   let title;
   let modePhase = 'idle';
   let remaining = null;
-  const remainingLabel = config.productId === 'hi-fatigue' ? 'Apytiksliai iki orientyro' : 'Iki kito orientyro';
+  const remainingLabel = approximate(config) ? 'Apytiksliai iki orientyro' : 'Iki kito orientyro';
   let nextTitle = '';
 
   if (uncertain) {
@@ -385,6 +397,7 @@ function loadOptions() {
   const options = settings[product.value];
   tempSelect.replaceChildren(...options.temperatures.map(temp => new Option(`${temp} °C`, String(temp))));
   methodSelect.replaceChildren(...Object.entries(options.methods).map(([key, name]) => new Option(String(name), key)));
+  if (['palacos-r', 'bonos-genta'].includes(product.value)) tempSelect.value = '21';
   element('temp-field').hidden = product.value === 'pmma';
   element('reference-temp').hidden = product.value !== 'pmma';
   element('method-field').hidden = !methodSelect.options.length;
