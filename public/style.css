@@ -485,3 +485,20 @@ body:not([data-running="true"]) #elapsed { font-size: clamp(4rem, min(27vw, 25vh
   .configuration { display: grid; grid-template-columns: 1fr 1fr; }
   .configuration .field:first-child { grid-column: 1 / -1; }
 }
+
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.configuration { max-width: 58rem; }
+.configuration .field { min-width: 0; }
+.configuration select { text-overflow: ellipsis; }
+.timeline-label strong { overflow-wrap: anywhere; }
+@media (orientation: portrait) and (max-width: 520px) {
+  main { margin-block: 0 auto; }
+  .monitor { gap: .65rem; }
+  .configuration:has(#method-field[hidden]) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .configuration:has(#method-field[hidden]) .field:first-child { grid-column: auto; }
+}

@@ -195,7 +195,6 @@ function renderClock(tick = null) {
   const steps = phasesFor(config);
   const phase = phaseAt(config, elapsed, state?.marks);
   let title;
-  let phaseLabel = 'Būsena';
   let modePhase = 'idle';
   let remaining = null;
   const remainingLabel = config.productId === 'hi-fatigue' ? 'Apytiksliai iki orientyro' : 'Iki kito orientyro';
@@ -215,7 +214,6 @@ function renderClock(tick = null) {
     if (phase.complete) {
       title = 'Sukietėjimo orientyras pasiektas';
     } else {
-      phaseLabel = '';
       title = steps[phase.index].title;
       remaining = phase.remaining;
       nextTitle = steps[phase.index].short;
@@ -227,7 +225,6 @@ function renderClock(tick = null) {
   clock.classList.toggle('hours', elapsed >= 3600000);
   setText(clock, timeText(elapsed));
   setText(element('clock-label'), uncertain ? 'Paskutinis patikimas rodmuo' : displayLabel);
-  setText(element('phase-label'), phaseLabel);
   setText(element('phase'), title);
   element('countdown').hidden = remaining === null;
   if (remaining !== null) {
