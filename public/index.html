@@ -30,10 +30,14 @@
       </div>
 
       <div class="session-heading">
-        <p id="session-mode" class="mode">Sudėtinis orientyras</p>
         <p id="session-config">Bendras PMMA · 20 °C</p>
       </div>
 
+      <div id="configuration" class="configuration">
+        <label class="field">Profilis <select id="product"></select></label>
+        <label class="field">Operacinės temperatūra <select id="temp"></select></label>
+        <label class="field" id="method-field">Maišymo būdas <select id="method"></select></label>
+      </div>
       <p id="notice" class="notice" role="status" hidden></p>
 
       <div class="phase-card">
@@ -62,14 +66,6 @@
       </section>
       <section class="controls" aria-label="Ciklo valdymas">
         <div id="setup">
-          <div class="setup-fields">
-            <label class="field" for="product">
-              <span>Profilis</span>
-              <select id="product"></select>
-            </label>
-
-          </div>
-
           <div class="setup-actions">
             <button id="start" type="button" class="primary" disabled>Pradėti maišymą</button>
           </div>
@@ -89,7 +85,7 @@
       <div class="source-content">
         <p>Skirta darbo eigai įvertinti. Tai nėra validuota medicinos priemonė. Laikmatis nenustato, ar cementas sukietėjo, ir nenurodo saugaus implantavimo intervalo. Vadovaukitės konkretaus produkto galiojančia instrukcija ir operacinės protokolu.</p>
         <p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/">„SmartSet HV“ tyrimas</a>: 20 °C, 50 % santykinė drėgmė, rankinis maišymas dubenyje. Nuo maišymo pradžios: plastiškos konsistencijos kriterijus (Doughing time) 148 ± 7 s, laboratorinis sukietėjimo laikas (Setting time) 534 ± 17 s (vidurkiai ± standartinis nuokrypis). 386 ± 21 s yra intervalas tarp šių taškų. Tyrime maišyta rankomis 15 s. Atskiras 30 s maišymo orientyras paimtas iš <a href="https://www.heraeus-medical.com/dam/jcr:e6ff3322-293f-4558-9aaa-0b6093dedf74/palacademy-cement-handling-mixing-phase-p10.pdf">„Heraeus PALACADEMY“, 10 psl.</a>, ne iš „SmartSet HV“ tyrimo.</p>
-        <p>„Refobacin“ duomenys dokumentuoti istorinėje IFU 9878300010, indeksas 03, 2018-05; taikymas Lietuvoje nepatvirtintas. „Hi-Fatigue G“ IFU grafiko ir teksto laukimo ribos nesuderintos. Abiem produktams prieinamas tik chronometras.</p>
+        <p>„Refobacin“ duomenys dokumentuoti istorinėje IFU 9878300010, indeksas 03, 2018-05; taikymas Lietuvoje nepatvirtintas. „Hi-Fatigue G“ IFU grafiko ir teksto laukimo ribos nesuderintos. „Refobacin“ rodo istorinius IFU orientyrus; nešaldytų komponentų temperatūra turi sutapti su aplinkos temperatūra. „Hi-Fatigue G“ laukimo pabaiga nerodoma, o kitos grafiko ribos apytikslės (skaitymo žingsnis 30 s); grafikas skirtas nešaldytam cementui.</p>
         <ul>
           <li><a href="https://www.zimmerbiomet.com/content/dam/zb-corporate/en/products/specialties/cement/refobacin-bone-cement-r/16361USenBiometBCRandRefobacinBCRProductSheetdigital.pdf#page=2" target="_blank" rel="noopener">„Zimmer Biomet“ maišymo grafikas, produkto aprašo 2 psl.</a>: iš anksto nešaldytas cementas, maišymas vakuume.</li>
           <li><a href="https://www.zimmerbiomet.com/en/products-and-solutions/specialties/cement/refobacin-bone-cement-r.html" target="_blank" rel="noopener">„Refobacin Bone Cement R“ produkto informacija</a></li>

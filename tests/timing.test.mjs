@@ -34,7 +34,7 @@ test('storage keys use the current and legacy browser contracts', () => {
   assert.equal(LEGACY_KEY, 'cemento-laikmatis-v1');
 });
 
-test('catalog offers one literature profile and two manual product profiles', () => {
+test('catalog offers one literature profile and two manufacturer reference profiles', () => {
   assert.deepEqual(PRODUCTS.map(({ id, status, temperatures }) => [id, status, temperatures]), [
     ['pmma', 'reference', []],
     ['refobacin', 'manual', []], ['hi-fatigue', 'manual', []],
@@ -47,8 +47,8 @@ test('catalog offers one literature profile and two manual product profiles', ()
   for (const product of [refobacin, hiFatigue]) {
     assert.ok(product.reason);
     assert.equal(Object.hasOwn(product, 'boundaries'), false);
-    assert.equal(resolveConfig(product.id).boundaries, null);
-    assert.throws(() => resolveConfig(product.id, 20), /no temperature/);
+    assert.ok(resolveConfig(product.id).boundaries.length);
+    assert.throws(() => resolveConfig(product.id, 25), /Unsupported configuration/);
   }
 });
 
