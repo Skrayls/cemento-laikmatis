@@ -81,7 +81,7 @@ function timeText(ms, round = Math.floor) {
 
 function renderNotice() {
   const lines = [];
-  if (concurrent) lines.push('Ciklą valdo arba pakeitė kitas skirtukas. Rodinys sustabdytas; patikrinkite kitą skirtuką.');
+  if (concurrent) lines.push('Rodinys sustabdytas: ciklą valdo arba pakeitė kitas skirtukas. Tęskite jame arba, jį uždarę, atnaujinkite šį puslapį.');
   if (corruptRecord) lines.push('Išsaugoto ciklo perskaityti nepavyko. Naujai sesijai išvalykite netinkamą įrašą.');
   if (live?.recovered) lines.push('Ciklas atkurtas; išsaugoti profilio parametrai nepakeisti.');
   if (live?.state.issue) lines.push('Praėjusio laiko patikimai nustatyti nepavyko. Rodomas paskutinis patikimas rodmuo; remkitės atsarginiu laikmačiu.');
@@ -140,7 +140,9 @@ function renderTimeline(config, state, elapsed, index, uncertain) {
   const marks = state?.marks ?? [];
   const displayElapsed = reducedMotion.matches && elapsed < total ? Math.floor(elapsed / 1000) * 1000 : elapsed;
   setText(element('timeline-title'), total ? 'Numatoma proceso eiga' : 'Rankiniu būdu pažymėti etapai');
-  setText(element('timeline-summary'), total ? `Modelio trukmė · ${timeText(total)}` : (state ? `${marks.length - 1} / 4 žymų` : ''));
+  const summary = element('timeline-summary');
+  summary.hidden = Boolean(total) || !state;
+  if (!summary.hidden) setText(summary, `${marks.length - 1} / 4 žymų`);
   marker.hidden = !total || !active;
   if (total && active) {
     // Include the inter-segment gaps so the indicator stays on the active fill.
@@ -574,13 +576,11 @@ modeButton.addEventListener('click', async () => {
   changingDisplay = true;
   fullScreenNote = '';
   if (document.body.classList.contains('or-mode')) {
-    setOR(false);
-    if (document.fullscreenElement) {
-      try {
-        await document.exitFullscreen();
-      } catch {
-        fullScreenNote = 'Norėdami išeiti iš viso ekrano, naudokite naršyklės komandą.';
-      }
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      setOR(false);
+    } catch {
+      fullScreenNote = 'Norėdami išeiti iš viso ekrano, naudokite naršyklės komandą.';
     }
   } else {
     setOR(true);
@@ -621,20 +621,25 @@ async function refreshWake() {
       await handle.release();
       return;
     }
+    if (handle.released) throw new Error('Wake lock was released before it could be used');
     wakeHandle = handle;
     wakeNote = '';
     handle.addEventListener('release', () => {
       if (wakeHandle !== handle) return;
       wakeHandle = null;
       if (intendedWake && document.visibilityState === 'visible') {
+        intendedWake = false;
         wakeNote = 'Ekrano budrumo palaikymas nutrūko; įrenginys gali užmigti.';
+        syncWakeButton();
         renderNotice();
       }
     }, { once: true });
   } catch {
+    intendedWake = false;
     wakeNote = 'Naršyklė negali palaikyti ekrano budrumo. Patikrinkite įrenginio nuostatas.';
   } finally {
     wakeRequest = false;
+    syncWakeButton();
     renderNotice();
   }
 }

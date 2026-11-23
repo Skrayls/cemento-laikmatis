@@ -51,6 +51,37 @@ test('demo starts at zero, uses the selected temperature, and stays active past 
   await expect(timer).toHaveText('30:02');
 });
 
+test('all modeled phases advance at their exact boundary, without a negative countdown', async ({ page }) => {
+  await freezeClock(page);
+  await page.goto('/');
+  await startTimer(page);
+  const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('demo', 20).boundaries);
+  const phase = page.locator('body');
+  const currentStep = page.locator('#timeline-labels [aria-current="step"]');
+  let elapsed = 0;
+
+  for (const [index, end] of ends.entries()) {
+    for (const offset of [-1000, 0, 1000]) {
+      const time = end + offset;
+      await page.clock.fastForward(time - elapsed);
+      elapsed = time;
+      // Sample the exact fake time, as the app does when visibility changes.
+      await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+      const expected = offset < 0 ? index : index + 1;
+      await expect(phase).toHaveAttribute('data-phase', String(expected));
+      if (expected < ends.length) {
+        await expect(currentStep).toHaveAttribute('data-step', String(expected));
+        await expect(page.locator('#remaining')).toBeVisible();
+        if (offset < 0) await expect(page.locator('#remaining')).toHaveText('00:01');
+        else await expect(page.locator('#remaining')).toHaveText(/^\d{2}:\d{2}$/);
+      } else {
+        await expect(currentStep).toHaveCount(0);
+        await expect(page.locator('#countdown')).toBeHidden();
+      }
+    }
+  }
+});
+
 test('cancel preserves running elapsed; abandoning and starting a new session are explicit', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
@@ -181,6 +212,56 @@ test('OR mode has a distraction-free fallback when fullscreen is unavailable', a
   await expect(page.locator('#abandon')).toBeVisible();
 });
 
+test('native fullscreen keeps timing visible and exits via the app or the browser', async ({ page }) => {
+  await freezeClock(page);
+  await page.goto('/');
+  await startTimer(page);
+  const toggle = page.locator('#or-mode');
+  const isFullscreen = () => page.evaluate(() => document.fullscreenElement === document.documentElement);
+
+  await toggle.click();
+  await expect.poll(isFullscreen).toBe(true);
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#abandon')).toBeHidden();
+  await expect(page.locator('#timeline')).toBeVisible();
+  await page.clock.runFor(1_100);
+  await expect(page.getByRole('timer')).toHaveText('00:01');
+
+  await toggle.click();
+  await expect.poll(isFullscreen).toBe(false);
+  await expect(page.locator('#abandon')).toBeVisible();
+
+  await toggle.click();
+  await expect.poll(isFullscreen).toBe(true);
+  await page.evaluate(() => document.exitFullscreen());
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#abandon')).toBeVisible();
+});
+
+test('Chromium acquires and releases a real screen wake lock when permitted', async ({ page, context }) => {
+  await context.grantPermissions(['screen-wake-lock']);
+  await page.addInitScript(() => {
+    const request = navigator.wakeLock.request.bind(navigator.wakeLock);
+    navigator.wakeLock.request = async type => {
+      const sentinel = await request(type);
+      document.documentElement.dataset.wakeLock = sentinel.released ? 'released' : 'held';
+      sentinel.addEventListener('release', () => {
+        document.documentElement.dataset.wakeLock = 'released';
+      }, { once: true });
+      return sentinel;
+    };
+  });
+  await page.goto('/');
+  await startTimer(page);
+  const wake = page.locator('#wake');
+  await wake.click();
+  await expect(page.locator('html')).toHaveAttribute('data-wake-lock', 'held');
+  await expect(wake).toHaveAttribute('aria-pressed', 'true');
+  await wake.click();
+  await expect(page.locator('html')).toHaveAttribute('data-wake-lock', 'released');
+  await expect(wake).toHaveAttribute('aria-pressed', 'false');
+});
+
 test('screen wake failure is reported without interrupting elapsed time', async ({ page }) => {
   await freezeClock(page);
   await page.addInitScript(() => {
@@ -192,6 +273,7 @@ test('screen wake failure is reported without interrupting elapsed time', async 
   await startTimer(page);
   await page.locator('#wake').click();
   await expect(page.locator('#notice')).toHaveText(/negali palaikyti ekrano budrumo/i);
+  await expect(page.locator('#wake')).toHaveAttribute('aria-pressed', 'false');
   await page.clock.runFor(1_100);
   await expect(page.getByRole('timer')).toHaveText('00:01');
 });
@@ -239,6 +321,16 @@ for (const viewport of [
           body: await page.screenshot(),
           contentType: 'image/png',
         });
+        await page.locator('#or-mode').click();
+        await expect(page.locator('body')).toHaveClass(/or-mode/);
+        await expect(page.locator('#timeline')).toBeInViewport({ ratio: 0.9 });
+        expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
+        await testInfo.attach(`or-mode-${viewport.width}x${viewport.height}`, {
+          body: await page.screenshot(),
+          contentType: 'image/png',
+        });
+        await page.locator('#or-mode').click();
+        await expect(page.locator('body')).not.toHaveClass(/or-mode/);
       }
 
       await page.clock.fastForward(ends.at(-1));

@@ -13,8 +13,9 @@ npm run check
 ## Scope
 
 - Unit checks cover exact boundary semantics, discrete demo data, invalid configurations, monotonic sampling, interruption and recovery, and the manual/legacy model. These tests use injected clocks, not sleeps.
-- Browser checks use a 1920 × 1080 OR monitor viewport and a 390 × 844 phone viewport. Validate actual flow (configuration, starting, lock and abandon controls, phase cues, completion, refresh safety, offline) rather than treating a screenshot as proof the timer is correct.
+- Chromium checks use a 1920 × 1080 OR monitor viewport and a 390 × 844 phone viewport, plus compact landscape, tablet, QHD and 4K viewports. The two primary viewports have active and OR-mode screenshots attached to the HTML report (`npx playwright show-report`); GitHub Actions uploads that report as `browser-qa`.
+- The browser suite checks starting, configuration lock, abandon confirmation, each demo phase at one second before, exactly at and one second after its boundary, completion, refresh recovery and offline operation. It exercises Chromium's fullscreen API (including external exit), the browser's screen wake-lock request and release with permission granted, and the fallback UI when a request is unavailable or denied.
 - The PWA needs a successful first online load and cache installation. To check manually, load the built app over HTTPS or localhost, wait for offline readiness, disconnect, reload, and start a **demonstration**. With an active session, reloading should recover the last checkpoint and flag uncertainty. An updated site must not apply its dataset mid-session.
-- Browser automation does not validate real OS locking, power loss, system time synchronization, fullscreen exit gestures, actual wake lock, Safari/iOS behaviour, readability across a room or material outcomes. Verify on target hardware with an independent calibrated reference and trained staff before any clinical evaluation around patients.
+- Browser automation does not validate real OS locking, power loss, system time synchronization, device-level display sleep, Safari/iOS behaviour, readability across a room or material outcomes. Verify on target hardware with an independent calibrated reference and trained staff before any clinical evaluation around patients.
 
 See [clinical safety](clinical-safety.md) for the remaining non-software gates.

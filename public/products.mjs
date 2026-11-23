@@ -61,7 +61,7 @@ const catalog = [
     version: '',
     temperatures: NO_TEMPERATURES,
     status: 'disabled',
-    reason: 'Automatinio laiko duomenų nėra',
+    reason: 'Automatiniai laikai nepatvirtinti',
   },
   {
     id: 'hi-fatigue',
@@ -72,7 +72,7 @@ const catalog = [
     version: '',
     temperatures: NO_TEMPERATURES,
     status: 'disabled',
-    reason: 'Automatinio laiko duomenų nėra',
+    reason: 'Automatiniai laikai nepatvirtinti',
   },
 ];
 
