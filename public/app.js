@@ -28,24 +28,24 @@ const phases = [
   { title: 'Maišymas', short: 'Maišymas' },
   { title: 'Paruošimas', short: 'Paruošimas' },
   { title: 'Darbinė fazė', short: 'Darbinė' },
-  { title: 'Galutinis kietėjimas', short: 'Kietėjimas' }
+  { title: 'Kietėjimas', short: 'Kietėjimas' }
 ];
 
 const displayLabel = 'Laikas nuo maišymo pradžios';
 const getClock = () => ({ wall: Date.now(), mono: performance.now() });
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const referencePhases = [
-  { title: 'Iki tešlos orientyro', short: 'Tešlos susidarymas' },
-  { title: 'Po tešlos orientyro', short: 'Sukietėjimo orientyras' },
+  { title: 'Iki orientyro', short: 'Plastiška konsistencija' },
+  { title: 'Po orientyro', short: 'Sukietėjimo laikas' },
 ];
 const manufacturerPhases = {
-  refobacin: ['Maišymas', 'Lipnioji fazė', 'Tešlos fazė', 'Galutinis kietėjimas'],
-  'hi-fatigue': ['Maišymas', 'Laukimas', 'Aplikacija', 'Kietėjimas'],
+  refobacin: { Mixing: 'Maišymas', Sticky: 'Paruošimas', Dough: 'Plastiška konsistencija', 'Final hardening': 'Kietėjimas' },
+  'hi-fatigue': { Mixing: 'Maišymas', Waiting: 'Laukimo fazė', Application: 'Aplikavimo fazė', Hardening: 'Kietėjimas' },
 };
 function phasesFor(config) {
   if (config.mode === 'reference') return referencePhases;
   const titles = manufacturerPhases[config.productId];
-  return titles ? titles.map(title => ({ title, short: title })) : phases;
+  return titles ? Object.values(titles).map(title => ({ title, short: title })) : phases;
 }
 let draft = resolveConfig('pmma');
 let live = null;
@@ -110,7 +110,7 @@ function buildTimeline(config) {
   track.replaceChildren();
   timelineLabels.replaceChildren();
   let previous = 0;
-  timelineLabels.style.setProperty('--steps', phasesFor(config).length);
+  timelineLabels.style.setProperty('--steps', String(phasesFor(config).length));
   timelineRows = phasesFor(config).map((phase, index) => {
     const boundary = config.boundaries?.[index];
     const duration = boundary === undefined ? 1 : boundary - previous;
