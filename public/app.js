@@ -110,7 +110,7 @@ function buildTimeline(config) {
   track.replaceChildren();
   timelineLabels.replaceChildren();
   let previous = 0;
-  timelineLabels.style.setProperty('--steps', phasesFor(config).length);
+  timelineLabels.style.setProperty('--steps', String(phasesFor(config).length));
   timelineRows = phasesFor(config).map((phase, index) => {
     const boundary = config.boundaries?.[index];
     const duration = boundary === undefined ? 1 : boundary - previous;
