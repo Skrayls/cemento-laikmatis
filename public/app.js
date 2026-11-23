@@ -35,8 +35,8 @@ const displayLabel = 'Laikas nuo maišymo pradžios';
 const getClock = () => ({ wall: Date.now(), mono: performance.now() });
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const referencePhases = [
-  { title: 'Iki plastiškumo orientyro', short: 'Plastiška konsistencija' },
-  { title: 'Po plastiškumo orientyro', short: 'Sukietėjimo laikas' },
+  { title: 'Iki orientyro', short: 'Plastiška konsistencija' },
+  { title: 'Po orientyro', short: 'Sukietėjimo laikas' },
 ];
 const manufacturerPhases = {
   refobacin: { Mixing: 'Maišymas', Sticky: 'Paruošimas', Dough: 'Plastiška konsistencija', 'Final hardening': 'Kietėjimas' },
