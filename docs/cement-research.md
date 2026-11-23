@@ -1,6 +1,10 @@
 # Cement research and data release status
 
-Reviewed 2026-11-22. **Neither named product has an enabled automatic clinical profile.** Where an older IFU gives numerical values, those values are documented below for traceability, not shipped as runnable presets. No certified timings are implied. The app's selectable 19, 20 and 21 °C values belong only to a fictional demonstration profile.
+Neither manufacturer profile schedules automatic phase transitions. The historical Refobacin table is versioned reference data, not a runnable preset.
+
+## Bendras PMMA — SmartSet HV study
+
+[Study and Table 1](https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/): manually bowl-mixed control at 20 °C and 50% relative humidity. Mean ± sample standard deviation, in seconds from mixing start: ASTM doughing criterion 148 ± 7; setting, at the midpoint of the rising exotherm, 534 ± 17. Working time 386 ± 21 is the measured difference between those endpoints, not a third endpoint. No mixing-end milestone or temperature correction is derived. Neither criterion establishes readiness, a safe application window or completed clinical hardening.
 
 ## Refobacin Bone Cement R — Zimmer Biomet
 
@@ -18,7 +22,7 @@ Antibiotic-loaded, radiopaque PMMA cement (gentamicin). The historical multiling
 
 The US graph distinguishes mixing, sticky, dough and final hardening, for vacuum mixing with non-prechilled cement. Sticky means the waiting/adhesive interval; dough is a handling phase, not an application deadline or a declaration of safety. Final hardening is a reference endpoint, not a measured material state. The historical EU IFU specifies ambient **and** component temperature at each table row; those inputs are not interchangeable with storage temperature or a midday room reading on its own.
 
-### Historical IFU Table 2 (reference only; NOT in the app)
+### Historical IFU Table 2 (reference only; never scheduled)
 
 Vacuum mixing, non-prechilled. Transcribed as cumulative thresholds, in seconds from the start of mixing:
 
@@ -27,6 +31,19 @@ Vacuum mixing, non-prechilled. Transcribed as cumulative thresholds, in seconds 
 | 19 °C | 30 | 110 | 285 | 660 |
 | 21 °C | 30 | 90 | 255 | 570 |
 | 23 °C | 30 | 75 | 230 | 500 |
+
+Other preparation methods (same cumulative units):
+
+| Preparation | Ambient | Mixing ends | Sticky ends | Dough ends | Hardening reference |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Non-prechilled, manual | 19 °C | 30 | 110 | 330 | 690 |
+| Non-prechilled, manual | 21 °C | 30 | 90 | 300 | 615 |
+| Non-prechilled, manual | 23 °C | 30 | 75 | 270 | 540 |
+| Components prechilled to 4 °C, vacuum | 19 °C | 30 | 255 | 580 | 960 |
+| Components prechilled to 4 °C, vacuum | 21 °C | 30 | 240 | 500 | 825 |
+| Components prechilled to 4 °C, vacuum | 23 °C | 30 | 225 | 440 | 720 |
+
+The PDF metadata is dated December 2019; the printed IFU revision above controls provenance.
 
 These are historical, illustrative reference times under specified conditions, not tolerances or guaranteed durations. Table entries are direct transcriptions, not digitized, interpolated or extrapolated. In particular, 20 °C is not a discrete row. Before release, confirm the current exact-market IFU, matching references and mixing system, quantitative uncertainty, and clinical applicability. Do not derive arbitrary margins from the plots.
 

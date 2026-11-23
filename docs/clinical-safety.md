@@ -1,8 +1,8 @@
 # Clinical evaluation and deployment boundaries
 
-**CEMENT TIMER PRO is a prototype for workflow and usability evaluation, not a validated medical device. Do not use it for patient care or make clinical decisions from the timer.** The public preview is for demonstration, not a deployment into a clinical environment.
+**CEMENT TIMER PRO is a prototype for workflow and usability evaluation, not a validated medical device. Do not use it for patient care or make clinical decisions from the timer.** The public preview is for workflow evaluation, not a deployment into a clinical environment.
 
-- The **demonstration** profile contains fictional phase boundaries. Its temperature choices are simulated inputs, not supported temperatures for either named cement. Reaching the demonstration's final reference does not confirm hardening.
+- The **Bendras PMMA** profile presents two SmartSet HV study averages at 20 °C. Neither milestone confirms the state of the cement being handled.
 - **Manual** mode is an elapsed stopwatch with optional operator-recorded phase markers. Labels report input, not an assessment of the material. There is no estimated remaining time in this mode.
 - No automatic clinical profile is enabled. Use the exact product's local, current manufacturer instructions in conjunction with local procedure and trained staff. Cement behaviour can differ with formulation, preparation and storage, component and ambient temperature, mixing method, and patient or procedural conditions.
 - If visibility, continuity, shared-tab ownership or time confidence is lost, do not infer elapsed time from a stale display. Verify against an independent approved time source. Discarding the on-screen session does not restart or affect physical polymerization.

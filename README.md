@@ -1,14 +1,13 @@
 # CEMENT TIMER PRO
 
-Lietuviška kaulinio cemento paruošimo eigos stebėjimo sąsaja, kurios numatytas režimas yra rankinis chronometras. Stambus chronometras skaičiuoja laiką nuo maišymo pradžios. Rankinis režimas leidžia žymėti stebimus etapus be apskaičiuotų fazių, o demonstracinis režimas rodo keturias fazes, likusį laiką ir proporcingą laiko juostą.
+Lietuviškas cemento paruošimo chronometras su proporcinga tyrimo orientyrų laiko juosta, OR režimu ir veikimu be ryšio.
 
 **Nevaliduota medicinos priemonė. Neskirta pacientų priežiūrai ar klinikiniams sprendimams.**
 
 ## Produktai ir temperatūra
 
-- **Demonstracija:** fiktyvūs 19, 20 ir 21 °C scenarijai (numatyta 20 °C), netaikomi jokiam konkrečiam cementui.
-- **Rankinis chronometras:** temperatūrinio modelio nėra. Rankinės žymos nėra medžiagos būklės įvertinimas.
-- **Refobacin Bone Cement R** ir **Hi-Fatigue G Bone Cement:** automatiniai profiliai išjungti. Ši laida nepalaiko jokių kliniškai patvirtintų temperatūrų ar fazių laikų. [Gamintojų šaltiniai, grafikų rodmenys ir duomenų ribos](docs/cement-research.md).
+- **Bendras PMMA (numatytasis):** „SmartSet HV“ tyrimo orientyrai ties 20 °C: 148 ± 7 s ir 534 ± 17 s nuo maišymo pradžios. 386 ± 21 s yra intervalas, ne atskiras taškas.
+- **Refobacin Bone Cement R** ir **Hi-Fatigue G:** rankinės fazių žymos, be automatinių perėjimų. [Šaltiniai ir taikymo ribos](docs/cement-research.md).
 
 ## Paleidimas ir patikra
 
