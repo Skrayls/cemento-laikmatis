@@ -42,7 +42,8 @@ const getClock = () => ({ wall: Date.now(), mono: performance.now() });
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const demo = PRODUCTS.find(item => item.id === 'demo');
 let temp = demo.temperatures.includes(20) ? 20 : demo.temperatures[0];
-let draft = resolveConfig('demo', temp);
+// Default to manual chronometer (no synthetic times, no temperature).
+let draft = resolveConfig('manual', null);
 let live = null;
 let expectedRecord = null;
 let legacyRecord = null;
@@ -281,15 +282,15 @@ function render() {
   queueAnimation();
 }
 
-for (const item of PRODUCTS) {
-  const option = document.createElement('option');
-  option.value = item.id;
-  option.disabled = item.status === 'disabled';
-  const name = item.id === 'demo' ? 'Mokomasis' : profileName(item.id, item.name);
-  option.textContent = option.disabled ? `${name} — nepatvirtinta` : name;
-  product.append(option);
-}
-product.value = 'demo';
+  for (const item of PRODUCTS) {
+    const option = document.createElement('option');
+    option.value = item.id;
+    option.disabled = item.status === 'disabled';
+    const name = item.id === 'demo' ? 'Demonstracija' : profileName(item.id, item.name);
+    option.textContent = option.disabled ? `${name} — nepatvirtinta` : name;
+    product.append(option);
+  }
+    product.value = draft.productId;
 
 function readRecord() {
   try {

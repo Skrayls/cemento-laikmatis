@@ -9,6 +9,8 @@ async function freezeClock(page) {
 }
 
 async function startTimer(page) {
+  // Ensure demo is selected
+  await page.locator('#product').selectOption('demo');
   await expect(page.locator('.timeline-segment')).toHaveCount(4);
   await page.locator('#conditions').check();
   await page.locator('#start').click();
@@ -21,6 +23,7 @@ async function startTimer(page) {
 test('demo starts at zero, uses the selected temperature, and stays active past the final phase', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
+  await page.locator('#product').selectOption('demo');
   const timer = page.getByRole('timer');
   await expect(timer).toHaveText('00:00');
   await expect(page.locator('#start')).toBeDisabled();
@@ -111,12 +114,35 @@ test('cancel preserves running elapsed; abandoning and starting a new session ar
   await expect(page.locator('#conditions')).not.toBeChecked();
 });
 
+test('manual default has no temperature field and no countdown', async ({ page }) => {
+  await freezeClock(page);
+  await page.goto('/');
+  // Default should be manual
+  const productSelect = page.locator('#product');
+  await expect(productSelect).toHaveValue('manual');
+  await expect(page.locator('#temperature-field')).toBeHidden();
+  await expect(page.locator('#remaining')).toBeHidden();
+  // Conditions must be checked before start
+  await expect(page.locator('#start')).toBeDisabled();
+  await page.locator('#conditions').check();
+  await expect(page.locator('#start')).toBeEnabled();
+  // Start manual timer
+  await page.locator('#start').click();
+  await expect(page.locator('#manual-next')).toBeVisible();
+  // Countdown should remain hidden in manual mode
+  await expect(page.locator('#remaining')).toBeHidden();
+});
+
 test('manual final marker records the phase without stopping elapsed', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
   await page.locator('#product').selectOption('manual');
   await expect(page.locator('#temperature-field')).toBeHidden();
-  await startTimer(page);
+  // Conditions must be checked before start
+  await expect(page.locator('#start')).toBeDisabled();
+  await page.locator('#conditions').check();
+  await expect(page.locator('#start')).toBeEnabled();
+  await page.locator('#start').click();
   const mark = page.locator('#manual-next');
   for (let index = 0; index < 4; index++) {
     // Sample away from the exact successive second so the displayed floor is
@@ -149,6 +175,7 @@ test('wall-only clock change freezes the last trustworthy elapsed and suppresses
 test('reload preserves the selected snapshot but shows an unverified elapsed gap', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
+  await page.locator('#product').selectOption('demo');
   await page.locator('#temperature-minus').click();
   await startTimer(page);
   await page.clock.runFor(5_100);
@@ -345,6 +372,7 @@ for (const viewport of [
 test('the segmented timeline is proportional and advances with elapsed time', async ({ page }) => {
   await freezeClock(page);
   await page.goto('/');
+  await page.locator('#product').selectOption('demo');
   const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('demo', 20).boundaries);
   const durations = ends.map((end, index) => end - (ends[index - 1] ?? 0));
   const segments = page.locator('.timeline-segment');

@@ -13,7 +13,7 @@
   <script type="module" src="./app.js"></script>
   <script type="module" src="./sw-register.js"></script>
 </head>
-<body data-mode="demo">
+<body data-mode="manual">
   <header class="masthead">
     <h1><span class="brand-mark" aria-hidden="true"></span>Cement Timer <span class="brand-pro">Pro</span></h1>
     <div class="display-actions">
@@ -25,8 +25,8 @@
   <main>
     <section class="monitor" aria-label="Laikmačio rodinys">
       <div class="session-heading">
-        <p id="session-mode" class="mode">Demonstracija</p>
-        <p id="session-config">Mokomasis profilis · 20 °C</p>
+        <p id="session-mode" class="mode">Rankinis režimas</p>
+        <p id="session-config">Rankinis chronometras</p>
       </div>
 
       <div class="clock">
@@ -41,8 +41,8 @@
           <p id="phase-label" class="phase-label">Būsena</p>
           <p id="phase" role="status">Paruošta pradėti</p>
         </div>
-        <div class="phase-next">
-          <div id="countdown">
+        <div class="phase-next" hidden>
+          <div id="countdown" hidden>
             <p id="remaining-label" class="phase-label">Numatoma maišymo trukmė</p>
             <p id="remaining">—</p>
           </div>
@@ -52,7 +52,7 @@
 
       <section id="timeline" class="timeline" aria-labelledby="timeline-title">
         <div class="timeline-heading">
-          <h2 id="timeline-title">Numatoma proceso eiga</h2>
+          <h2 id="timeline-title">Rankinės etapų žymos</h2>
           <p id="timeline-summary"></p>
         </div>
         <div id="timeline-track" class="timeline-track" aria-hidden="true">
@@ -67,7 +67,7 @@
               <span>Profilis</span>
               <select id="product"></select>
             </label>
-            <fieldset id="temperature-field" class="field temp-field">
+            <fieldset id="temperature-field" class="field temp-field" hidden>
               <legend>Temperatūra</legend>
               <div class="stepper">
                 <button id="temperature-minus" type="button" aria-label="Sumažinti temperatūrą">−</button>
@@ -81,7 +81,7 @@
           <div class="setup-actions">
             <label class="check" for="conditions">
               <input id="conditions" type="checkbox">
-              <span id="conditions-label">Suprantu, kad demonstraciniai laikai sintetiniai ir netinka klinikiniam naudojimui.</span>
+              <span id="conditions-label">Suprantu, kad laikmatis nenustato fazių; jas pažymėsiu rankiniu būdu.</span>
             </label>
             <button id="start" type="button" class="primary" disabled>Pradėti maišymą</button>
           </div>

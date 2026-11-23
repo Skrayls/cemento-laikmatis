@@ -1,6 +1,6 @@
 # CEMENT TIMER PRO
 
-Lietuviška kaulinio cemento paruošimo eigos **demonstracinė** stebėjimo sąsaja operacinės monitoriui ir telefonui. Stambus chronometras skaičiuoja laiką nuo maišymo pradžios. Demonstracinis režimas rodo keturias fazes, likusį laiką ir proporcingą laiko juostą. Rankinis režimas leidžia žymėti stebimus etapus be apskaičiuotų fazių.
+Lietuviška kaulinio cemento paruošimo eigos stebėjimo sąsaja, kurios numatytas režimas yra rankinis chronometras. Stambus chronometras skaičiuoja laiką nuo maišymo pradžios. Rankinis režimas leidžia žymėti stebimus etapus be apskaičiuotų fazių, o demonstracinis režimas rodo keturias fazes, likusį laiką ir proporcingą laiko juostą.
 
 **Nevaliduota medicinos priemonė. Neskirta pacientų priežiūrai ar klinikiniams sprendimams.**
 
