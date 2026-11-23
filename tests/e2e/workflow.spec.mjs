@@ -9,8 +9,6 @@ async function freezeClock(page) {
 }
 
 async function startTimer(page) {
-  await expect(page.locator('.timeline-segment')).toHaveCount(2);
-  await page.locator('#conditions').check();
   await page.locator('#start').click();
   // Starting first claims the session lock asynchronously. Don't jump the
   // injected clock while the zero of the session is still being established.
@@ -22,16 +20,17 @@ test('literature reference starts at zero, shows fixed study temperature, and st
   await freezeClock(page);
   await page.goto('/');
   const timer = page.getByRole('timer');
-  await expect(timer).toHaveText('00:00');
-  await expect(page.locator('#start')).toBeDisabled();
+  await expect(timer).toBeHidden();
+  await expect(page.locator('#start')).toBeEnabled();
 
   await startTimer(page);
+  await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page.locator('#product')).toBeHidden();
   await expect(page.locator('#phase')).toHaveText(/iki tešlos orientyro/i);
   await expect(page.locator('#session-config')).toHaveText(/20\s*°C/);
   await page.clock.runFor(1_100);
   await expect(timer).toHaveText('00:01');
-  await expect(page.locator('#remaining')).not.toHaveText(/-/);
+  await expect(page.locator('#remaining')).toHaveText('02:27');
 
   // A long gap with advancing monotonic and system clocks models throttled callbacks.
   await page.clock.fastForward(30 * 60_000);
@@ -97,10 +96,9 @@ test('cancel preserves running elapsed; abandoning and starting a new session ar
 
   await page.locator('#new-session').click();
   if (await dialog.isVisible()) await page.locator('#confirm-yes').click();
-  await expect(timer).toHaveText('00:00');
+  await expect(timer).toBeHidden();
   await expect(page.locator('#start')).toBeVisible();
-  await expect(page.locator('#start')).toBeDisabled();
-  await expect(page.locator('#conditions')).not.toBeChecked();
+  await expect(page.locator('#start')).toBeEnabled();
 });
 
 test('manufacturer profile has no temperature field or automatic countdown', async ({ page }) => {
@@ -111,9 +109,6 @@ test('manufacturer profile has no temperature field or automatic countdown', asy
   await productSelect.selectOption('hi-fatigue');
   await expect(page.locator('#temperature-field')).toBeHidden();
   await expect(page.locator('#remaining')).toBeHidden();
-  // Conditions must be checked before start
-  await expect(page.locator('#start')).toBeDisabled();
-  await page.locator('#conditions').check();
   await expect(page.locator('#start')).toBeEnabled();
   // Start manual timer
   await page.locator('#start').click();
@@ -127,11 +122,9 @@ test('manual final marker records the phase without stopping elapsed', async ({ 
   await page.goto('/');
   await page.locator('#product').selectOption('refobacin');
   await expect(page.locator('#temperature-field')).toBeHidden();
-  // Conditions must be checked before start
-  await expect(page.locator('#start')).toBeDisabled();
-  await page.locator('#conditions').check();
   await expect(page.locator('#start')).toBeEnabled();
   await page.locator('#start').click();
+  await expect(page.getByRole('timer')).toHaveText('00:00');
   const mark = page.locator('#manual-next');
   for (let index = 0; index < 4; index++) {
     // Sample away from the exact successive second so the displayed floor is
@@ -295,13 +288,14 @@ test('screen wake failure is reported without interrupting elapsed time', async 
 for (const viewport of [
   { width: 1920, height: 1080 },
   { width: 390, height: 844 },
+  { width: 430, height: 932 },
   { width: 844, height: 390 },
   { width: 1024, height: 768 },
   { width: 2560, height: 1440 },
   { width: 3840, height: 2160 },
 ]) {
   test.describe(`${viewport.width}×${viewport.height}`, () => {
-    const mobile = viewport.width === 390 || viewport.height === 390;
+    const mobile = Math.min(viewport.width, viewport.height) <= 430;
     test.use({ viewport, reducedMotion: 'reduce', hasTouch: mobile, isMobile: mobile });
 
     test('timing view fits, keeps the timer dominant, and retains phase and timeline', async ({ page }, testInfo) => {
@@ -360,6 +354,7 @@ test('the segmented timeline is proportional and advances with elapsed time', as
   await freezeClock(page);
   await page.goto('/');
   const ends = await page.evaluate(async () => (await import('./products.mjs')).resolveConfig('pmma').boundaries);
+  await startTimer(page);
   const durations = ends.map((end, index) => end - (ends[index - 1] ?? 0));
   const segments = page.locator('.timeline-segment');
   await expect(segments).toHaveCount(2);
@@ -369,7 +364,6 @@ test('the segmented timeline is proportional and advances with elapsed time', as
   expect(widths).toHaveLength(2);
   const width = widths.reduce((sum, part) => sum + part, 0);
   widths.forEach((part, index) => expect(part / width).toBeCloseTo(durations[index] / ends.at(-1), 2));
-  await startTimer(page);
   const marker = page.locator('#timeline-marker');
   const zero = await marker.boundingBox();
   await page.clock.runFor(ends[0] + 250);
@@ -397,7 +391,6 @@ test('timer glyphs retain their width as the displayed digits change', async ({ 
 
 test('automated accessibility: setup and active screen', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.timeline-segment')).toHaveCount(2);
   const audit = () => new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect((await audit()).violations).toEqual([]);

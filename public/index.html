@@ -43,7 +43,7 @@
         </div>
         <div class="phase-next" hidden>
           <div id="countdown" hidden>
-            <p id="remaining-label" class="phase-label">Numatoma maišymo trukmė</p>
+            <p id="remaining-label" class="phase-label">Iki kito orientyro</p>
             <p id="remaining">—</p>
           </div>
           <p id="next-phase" hidden></p>
@@ -72,11 +72,7 @@
           </div>
 
           <div class="setup-actions">
-            <label class="check" for="conditions">
-              <input id="conditions" type="checkbox">
-              <span id="conditions-label">Suprantu, kad laikmatis nenustato fazių; jas pažymėsiu rankiniu būdu.</span>
-            </label>
-            <button id="start" type="button" class="primary" disabled>Pradėti maišymą</button>
+            <button id="start" aria-describedby="method" type="button" class="primary" disabled>Pradėti maišymą</button>
           </div>
         </div>
 

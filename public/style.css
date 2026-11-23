@@ -318,7 +318,7 @@ body[data-phase="4"] #phase { font-size: clamp(1.17rem, 2.55vw, 4.4rem); }
 }
 .setup-fields {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   align-items: end;
   gap: .6rem 1.1rem;
 }
@@ -340,15 +340,6 @@ body[data-phase="4"] #phase { font-size: clamp(1.17rem, 2.55vw, 4.4rem); }
   color: var(--text);
   font-size: .94rem;
 }
-.stepper { display: flex; align-items: center; gap: .15rem; }
-.stepper button { padding: .25rem; min-width: 44px; font-size: 1.25rem; background: var(--raised); }
-.stepper output {
-  min-width: 3.55rem;
-  color: var(--text);
-  text-align: center;
-  white-space: nowrap;
-  font: 700 1rem/1 var(--mono);
-}
 .method { color: var(--muted); font-size: .83rem; align-self: center; }
 .setup-actions, .session-actions {
   display: flex;
@@ -359,17 +350,6 @@ body[data-phase="4"] #phase { font-size: clamp(1.17rem, 2.55vw, 4.4rem); }
 }
 .setup-actions { margin-top: .75rem; }
 .session-actions { justify-content: end; }
-.check {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  min-height: 44px;
-  color: var(--muted);
-  font-size: .88rem;
-  cursor: pointer;
-}
-.check input { flex: 0 0 auto; width: 1.18rem; height: 1.18rem; margin: 0; accent-color: var(--mint); }
-
 footer {
   position: relative;
   display: flex;
@@ -427,8 +407,8 @@ body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); 
   #remaining { font-size: clamp(1.65rem, 7.5vw, 2.55rem); }
   #next-phase { font-size: .81rem; line-height: 1.25; }
   .timeline-labels { gap: .25rem; }
-  .timeline-label { font-size: .68rem; }
-  .setup-fields { grid-template-columns: minmax(0, 1fr) auto; gap: .45rem .65rem; }
+  .timeline-label { font-size: .78rem; }
+  .setup-fields { grid-template-columns: minmax(0, 1fr); gap: .55rem; }
   .method { grid-column: 1 / -1; }
   .setup-actions { margin-top: .35rem; }
   .setup-actions .primary { width: 100%; }
@@ -479,4 +459,23 @@ body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); 
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
+}
+
+/* Configuration is its own view; active timing gets the entire monitor. */
+body.is-ready .monitor {
+  max-width: 42rem;
+}
+body.is-ready .monitor > :is(.clock, .phase-card, .timeline) {
+  display: none;
+}
+body.is-ready .session-heading {
+  flex-wrap: wrap;
+}
+#start {
+  width: 100%;
+  min-height: 52px;
+  font-size: 1.12rem;
+}
+.timeline-track {
+  min-height: 14px;
 }
