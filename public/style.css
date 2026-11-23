@@ -199,6 +199,8 @@ body[data-phase="uncertain"] { --current: var(--amber); }
   transition: color 200ms ease;
 }
 body[data-running="true"] #phase { text-transform: uppercase; }
+/* The final reference is a full sentence, not a short phase name. */
+body[data-phase="4"] #phase { font-size: clamp(1.17rem, 2.55vw, 4.4rem); }
 #remaining {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
