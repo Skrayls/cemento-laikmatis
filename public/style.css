@@ -137,7 +137,7 @@ body[data-mode="reference"] .mode { border-color: #947344; color: var(--amber); 
   font-family: Arial, system-ui, sans-serif;
   font-kerning: none;
   font-variant-numeric: tabular-nums lining-nums;
-  font-size: clamp(5rem, min(24vw, 35vh), 30rem);
+  font-size: clamp(5rem, min(26vw, 39vh), 30rem);
   font-weight: 750;
   line-height: 1;
   letter-spacing: -.035em;
@@ -388,7 +388,7 @@ dialog p { margin: .7rem 0 1rem; color: var(--muted); }
 body.or-mode .sources, body.or-mode #abandon, body.or-mode #new-session { display: none; }
 body.or-mode footer { justify-content: center; }
 body.or-mode .controls { display: none; }
-body.or-mode #elapsed { font-size: clamp(5rem, min(26vw, 38vh), 35rem); }
+body.or-mode #elapsed { font-size: clamp(5rem, min(28vw, 42vh), 35rem); }
 body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); }
 
 @media (max-width: 680px) {
@@ -398,7 +398,7 @@ body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); 
   .display-actions { gap: .25rem; }
   .display-actions button { padding: .4rem .5rem; font-size: .73rem; white-space: normal; }
   main { padding: 1rem 0; }
-  #elapsed, body.or-mode #elapsed { font-size: clamp(4.5rem, 34vw, 12.5rem); }
+  #elapsed, body.or-mode #elapsed { font-size: clamp(4.5rem, 38vw, 12.5rem); }
   #elapsed.hours, body.or-mode #elapsed.hours { font-size: clamp(3rem, 18vw, 7rem); }
   .phase-card { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
   .phase-current, .phase-next { padding: .65rem .55rem; }
@@ -429,7 +429,7 @@ body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); 
   .masthead { padding-block: .2rem; min-height: 48px; }
   .monitor { gap: .28rem; }
   .clock-label { font-size: .68rem; }
-  #elapsed, body.or-mode #elapsed { font-size: clamp(3.5rem, 23vh, 6.5rem); }
+  #elapsed, body.or-mode #elapsed { font-size: clamp(3.5rem, 25vh, 7rem); }
   #elapsed.hours, body.or-mode #elapsed.hours { font-size: clamp(2.75rem, 19vh, 5.5rem); }
   .phase-card { min-height: 3.2rem; }
   .phase-current, .phase-next { padding-block: .28rem; }
@@ -475,7 +475,7 @@ body[data-mode="reference"] #phase {
 }
 .setup-fields { grid-template-columns: 1fr; }
 body:not([data-running="true"]) .monitor { gap: .65rem; }
-body:not([data-running="true"]) #elapsed { font-size: clamp(4rem, min(27vw, 25vh), 19rem); }
+body:not([data-running="true"]) #elapsed { font-size: clamp(4rem, min(34vw, 29vh), 19rem); }
 
 .configuration { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem .75rem; }
 .configuration .field { flex: 0 1 auto; max-width: 100%; }

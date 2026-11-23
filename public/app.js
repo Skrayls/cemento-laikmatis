@@ -262,8 +262,10 @@ function renderControls() {
   const configuration = element('configuration');
   configuration.hidden = Boolean(state) || corruptRecord;
   element('session-config').hidden = !configuration.hidden;
+  const isPmma = config.productId === 'pmma';
+  const temperatureLabel = isPmma ? 'Atskaitos temperatūra' : 'Operacinė';
   setText(element('session-config'), config.mode !== 'reference' ? name :
-    [name, `${config.temp} °C`, config.productId !== 'pmma' ? config.method : ''].filter(Boolean).join(' · '));
+    [name, `${temperatureLabel} ${config.temp} °C`, isPmma ? '' : config.method].filter(Boolean).join(' · '));
   tempSelect.disabled = !adjustable || tempSelect.options.length < 2;
   methodSelect.disabled = !adjustable;
   element('setup').hidden = Boolean(state) || corruptRecord;
