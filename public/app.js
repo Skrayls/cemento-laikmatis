@@ -207,6 +207,8 @@ function renderClock(tick = null) {
     title = state.status === 'archived' ? 'Ankstesnis ciklas baigtas' : 'Ciklas anuliuotas';
   } else if (active && oldSchedule) {
     title = 'Ankstesnis ciklas · tik praėjęs laikas';
+  } else if (!active) {
+    title = 'Paruošta';
   } else if (!modeled) {
     title = 'Orientyrų nėra';
   } else {
@@ -261,6 +263,7 @@ function renderControls() {
   newSession.hidden = !corruptRecord && (!state || active);
   newSession.disabled = concurrent || pending;
   setText(newSession, corruptRecord ? 'Išvalyti netinkamą įrašą' : 'Naujas ciklas');
+  modeButton.hidden = !active && !document.body.classList.contains('or-mode');
   modeButton.disabled = changingDisplay || (!active && !document.body.classList.contains('or-mode'));
   wake.hidden = !active || !('wakeLock' in navigator);
   syncWakeButton();
@@ -382,6 +385,8 @@ function loadOptions() {
   const options = settings[product.value];
   tempSelect.replaceChildren(...options.temperatures.map(temp => new Option(`${temp} °C`, String(temp))));
   methodSelect.replaceChildren(...Object.entries(options.methods).map(([key, name]) => new Option(String(name), key)));
+  element('temp-field').hidden = product.value === 'pmma';
+  element('reference-temp').hidden = product.value !== 'pmma';
   element('method-field').hidden = !methodSelect.options.length;
 }
 
@@ -542,7 +547,10 @@ function setOR(enabled) {
   document.body.classList.toggle('or-mode', enabled);
   modeButton.setAttribute('aria-pressed', String(enabled));
   setText(modeButton, enabled ? 'Išeiti iš OR režimo' : 'OR režimas');
-  if (!enabled) nativeFullscreen = false;
+  if (!enabled) {
+    nativeFullscreen = false;
+    fullScreenNote = '';
+  }
   renderControls();
 }
 
@@ -564,8 +572,9 @@ modeButton.addEventListener('click', async () => {
         await document.documentElement.requestFullscreen();
         nativeFullscreen = Boolean(document.fullscreenElement);
       }
+      if (!nativeFullscreen) fullScreenNote = 'OR rodinys · ne viso ekrano režimas';
     } catch {
-      fullScreenNote = 'Naršyklė neįjungė viso ekrano. Supaprastintas OR rodinys veikia.';
+      fullScreenNote = 'OR rodinys · ne viso ekrano režimas';
     }
   }
   changingDisplay = false;

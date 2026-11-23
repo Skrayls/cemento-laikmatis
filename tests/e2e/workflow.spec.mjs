@@ -22,6 +22,11 @@ test('literature reference starts at zero, shows fixed study temperature, and st
   const timer = page.getByRole('timer');
   await expect(timer).toBeVisible();
   await expect(timer).toHaveText('00:00');
+  await expect(page.locator('#phase')).toHaveText('Paruošta');
+  await expect(page.locator('#countdown')).toBeHidden();
+  await expect(page.locator('#timeline')).toBeVisible();
+  await expect(page.locator('#reference-temp')).toHaveText('Atskaitos temperatūra · 20 °C');
+  await expect(page.locator('#temp')).toBeHidden();
   expect((await timer.boundingBox()).y).toBeLessThan((await page.locator('#product').boundingBox()).y);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.locator('#start')).toBeEnabled();
@@ -388,3 +393,42 @@ test('automated accessibility: setup and active screen', async ({ page }) => {
   await startTimer(page);
   expect((await audit()).violations).toEqual([]);
 });
+
+for (const [profile, methods, temperatures] of [
+  ['refobacin', ['vacuum', 'manual', 'chilledVacuum'], [19, 21, 23]],
+  ['hi-fatigue', ['vacuum', 'manual'], [18, 19, 20, 21, 22, 23]],
+]) {
+  for (const method of methods) for (const temp of temperatures) {
+    test(`${profile}: ${method} at ${temp} °C reaches every boundary`, async ({ page }) => {
+      await freezeClock(page);
+      await page.goto('/');
+      await page.locator('#product').selectOption(profile);
+      await page.locator('#temp').selectOption(String(temp));
+      await page.locator('#method').selectOption(method);
+      const ends = await page.evaluate(async ([id, temp, method]) =>
+        (await import('./products.mjs')).resolveConfig(id, temp, method).boundaries,
+      [profile, temp, method]);
+      await startTimer(page);
+      let elapsed = 0;
+      for (const [index, end] of ends.entries()) {
+        await page.clock.fastForward(end - elapsed - 1000);
+        await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+        await expect(page.locator('[aria-current="step"]')).toHaveAttribute('data-step', String(index));
+        await expect(page.locator('#remaining')).toHaveText('00:01');
+        await page.clock.fastForward(1000);
+        await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+        elapsed = end;
+      }
+      await expect(page.locator('#countdown')).toBeHidden();
+      await expect(page.locator('#timeline-marker')).toHaveCSS('left', /px$/);
+      await expect(page.locator('#phase')).toHaveText('Sukietėjimo orientyras pasiektas');
+      const finalTime = await page.locator('#elapsed').textContent();
+      await page.clock.runFor(1100);
+      await expect(page.locator('#elapsed')).not.toHaveText(finalTime);
+      await page.locator('#abandon').click();
+      await page.locator('#confirm-yes').click();
+      await page.locator('#new-session').click();
+      await startTimer(page);
+    });
+  }
+}

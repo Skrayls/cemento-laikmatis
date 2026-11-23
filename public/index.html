@@ -18,7 +18,7 @@
     <h1><span class="brand-mark" aria-hidden="true"></span>Cement Timer <span class="brand-pro">Pro</span></h1>
     <div class="display-actions">
       <button id="wake" type="button" class="quiet" aria-pressed="false" hidden>Neužmigdyti ekrano</button>
-      <button id="or-mode" type="button" class="quiet" aria-pressed="false" disabled>OR režimas</button>
+      <button id="or-mode" type="button" class="quiet" aria-pressed="false" hidden disabled>OR režimas</button>
     </div>
   </header>
 
@@ -35,14 +35,15 @@
 
       <div id="configuration" class="configuration">
         <label class="field">Profilis <select id="product"></select></label>
-        <label class="field">Operacinės temperatūra <select id="temp"></select></label>
+        <p id="reference-temp" class="reference-temp">Atskaitos temperatūra · 20 °C</p>
+        <label class="field" id="temp-field" hidden>Operacinės temperatūra <select id="temp"></select></label>
         <label class="field" id="method-field">Maišymo būdas <select id="method"></select></label>
       </div>
       <p id="notice" class="notice" role="status" hidden></p>
 
       <div class="phase-card">
         <div class="phase-current">
-          <p id="phase" role="status">Paruošta pradėti</p>
+          <p id="phase" role="status">Paruošta</p>
         </div>
         <div class="phase-next" hidden>
           <div id="countdown" hidden>
@@ -81,6 +82,7 @@
   <footer>
     <details class="sources">
       <summary>Šaltiniai ir metodika</summary>
+      <p class="reference-temp" id="build-id">Cement Timer PRO V7 · build dev</p>
       <div class="source-content">
         <p>Skirta darbo eigai įvertinti. Tai nėra validuota medicinos priemonė. Laikmatis nenustato, ar cementas sukietėjo, ir nenurodo saugaus implantavimo intervalo. Vadovaukitės konkretaus produkto galiojančia instrukcija ir operacinės protokolu.</p>
         <p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4650370/">„SmartSet HV“ tyrimas</a>: 20 °C, 50 % santykinė drėgmė, rankinis maišymas dubenyje. Nuo maišymo pradžios: plastiškos konsistencijos kriterijus (Doughing time) 148 ± 7 s, laboratorinis sukietėjimo laikas (Setting time) 534 ± 17 s (vidurkiai ± standartinis nuokrypis). 386 ± 21 s yra intervalas tarp šių taškų. Tyrime maišyta rankomis 15 s. Atskiras 30 s maišymo orientyras paimtas iš <a href="https://www.heraeus-medical.com/dam/jcr:e6ff3322-293f-4558-9aaa-0b6093dedf74/palacademy-cement-handling-mixing-phase-p10.pdf">„Heraeus PALACADEMY“, 10 psl.</a>, ne iš „SmartSet HV“ tyrimo.</p>
