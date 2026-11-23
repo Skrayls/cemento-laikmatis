@@ -434,3 +434,18 @@ for (const [profile, methods, temperatures] of [
     });
   }
 }
+
+test('the longest mixing method fits the closed selector on narrow phones', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto('/');
+  await page.locator('#product').selectOption('palacos-r');
+  const method = page.getByLabel('Maišymo būdas');
+  await method.selectOption('chilledVacuum');
+  const dimensions = await method.evaluate(select => {
+    const context = document.createElement('canvas').getContext('2d');
+    context.font = getComputedStyle(select).font;
+    // Leave space for the control padding and native chevron.
+    return { needed: context.measureText(select.selectedOptions[0].text).width + 40, available: select.offsetWidth };
+  });
+  expect(dimensions.available).toBeGreaterThanOrEqual(dimensions.needed);
+});
