@@ -137,7 +137,7 @@ body[data-mode="reference"] .mode { border-color: #947344; color: var(--amber); 
   font-family: Arial, system-ui, sans-serif;
   font-kerning: none;
   font-variant-numeric: tabular-nums lining-nums;
-  font-size: clamp(5rem, min(26vw, 39vh), 30rem);
+  font-size: clamp(5rem, min(26vw, 36vh), 30rem);
   font-weight: 750;
   line-height: 1;
   letter-spacing: -.035em;
