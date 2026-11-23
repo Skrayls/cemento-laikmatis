@@ -1,4 +1,4 @@
-import { SMARTSET, REFOBACIN } from './evidence.mjs';
+import { MIXING_REFERENCE, SMARTSET, REFOBACIN } from './evidence.mjs';
 
 /**
  * @typedef {object} Product
@@ -33,8 +33,8 @@ const catalog = [
   {
     id: 'pmma', name: 'Bendras PMMA', manufacturer: 'SmartSet HV tyrimas',
     method: 'Rankinis maišymas dubenyje', conditions: '20 °C, 50 % santykinė drėgmė',
-    version: SMARTSET.version, temperatures: NO_TEMPERATURES, status: 'reference',
-    reason: 'Literatūros orientyras',
+    version: `composite-30s+${SMARTSET.version}`, temperatures: NO_TEMPERATURES, status: 'reference',
+    reason: 'Sudėtinis orientyras',
   },
   {
     id: 'refobacin',
@@ -75,7 +75,7 @@ export function resolveConfig(productId, temp) {
   const details = { name, manufacturer, method, conditions, version };
   if (productId === 'pmma') {
     if (temp != null && temp !== SMARTSET.temperature) throw new RangeError('Unsupported temperature');
-    const boundaries = Object.freeze([SMARTSET.doughing.mean * 1000, SMARTSET.setting.mean * 1000]);
+    const boundaries = Object.freeze([MIXING_REFERENCE.seconds * 1000, SMARTSET.doughing.mean * 1000, SMARTSET.setting.mean * 1000]);
     return Object.freeze({ productId, ...details, temp: SMARTSET.temperature, mode: 'reference', boundaries });
   }
   if (productId !== 'manual' && productId !== 'refobacin' && productId !== 'hi-fatigue') {

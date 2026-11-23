@@ -14,7 +14,6 @@ const product = /** @type {HTMLSelectElement} */ (element('product'));
 const start = /** @type {HTMLButtonElement} */ (element('start'));
 const abandon = /** @type {HTMLButtonElement} */ (element('abandon'));
 const newSession = /** @type {HTMLButtonElement} */ (element('new-session'));
-const manualNext = /** @type {HTMLButtonElement} */ (element('manual-next'));
 const modeButton = /** @type {HTMLButtonElement} */ (element('or-mode'));
 const wake = /** @type {HTMLButtonElement} */ (element('wake'));
 const dialog = /** @type {HTMLDialogElement} */ (element('confirm-action'));
@@ -24,28 +23,17 @@ const track = element('timeline-track');
 const marker = element('timeline-marker');
 const timelineLabels = element('timeline-labels');
 
-const phases = [
-  { title: 'Maišymas', short: 'Maišymas' },
-  { title: 'Paruošimas', short: 'Paruošimas' },
-  { title: 'Darbinė fazė', short: 'Darbinė' },
-  { title: 'Kietėjimas', short: 'Kietėjimas' }
+const studyPhases = [
+  { title: 'Paruošimas', short: 'Plastiška konsistencija' },
+  { title: 'Plastiška konsistencija · orientyras', short: 'Sukietėjimo laikas' },
 ];
-
+const mixingPhase = { title: 'Maišymas', short: 'Maišymo orientyras' };
 const displayLabel = 'Laikas nuo maišymo pradžios';
 const getClock = () => ({ wall: Date.now(), mono: performance.now() });
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const referencePhases = [
-  { title: 'Iki orientyro', short: 'Plastiška konsistencija' },
-  { title: 'Po orientyro', short: 'Sukietėjimo laikas' },
-];
-const manufacturerPhases = {
-  refobacin: { Mixing: 'Maišymas', Sticky: 'Paruošimas', Dough: 'Plastiška konsistencija', 'Final hardening': 'Kietėjimas' },
-  'hi-fatigue': { Mixing: 'Maišymas', Waiting: 'Laukimo fazė', Application: 'Aplikavimo fazė', Hardening: 'Kietėjimas' },
-};
+
 function phasesFor(config) {
-  if (config.mode === 'reference') return referencePhases;
-  const titles = manufacturerPhases[config.productId];
-  return titles ? Object.values(titles).map(title => ({ title, short: title })) : phases;
+  return config.boundaries?.length === 3 ? [mixingPhase, ...studyPhases] : studyPhases;
 }
 let draft = resolveConfig('pmma');
 let live = null;
@@ -137,15 +125,15 @@ function buildTimeline(config) {
 
 function renderTimeline(config, state, elapsed, index, uncertain) {
   const timeline = element('timeline');
-  timeline.hidden = uncertain;
-  if (uncertain) return;
+  timeline.hidden = uncertain || !config.boundaries;
+  if (timeline.hidden) return;
   if (timelineConfig !== config) buildTimeline(config);
 
   const total = config.boundaries?.at(-1);
   const active = state?.status === 'active';
   const marks = state?.marks ?? [];
   const displayElapsed = reducedMotion.matches && elapsed < total ? Math.floor(elapsed / 1000) * 1000 : elapsed;
-  setText(element('timeline-title'), total ? 'Literatūros atskaitos taškai' : 'Rankiniu būdu pažymėti etapai');
+  setText(element('timeline-title'), total ? 'Atskaitos taškai' : 'Rankiniu būdu pažymėti etapai');
   const summary = element('timeline-summary');
   summary.hidden = Boolean(total) || !state;
   if (!summary.hidden) setText(summary, `${marks.length - 1} / 4 žymų`);
@@ -184,11 +172,10 @@ function renderClock(tick = null) {
   const config = state?.config ?? draft;
   const active = state?.status === 'active';
   const modeled = config.boundaries !== null;
-  const reference = config.mode === 'reference';
   const oldSchedule = config.mode === 'demo';
   const steps = phasesFor(config);
   const phase = phaseAt(config, elapsed, state?.marks);
-  let title = 'Paruošta pradėti';
+  let title;
   let phaseLabel = 'Būsena';
   let modePhase = 'idle';
   let remaining = null;
@@ -202,21 +189,18 @@ function renderClock(tick = null) {
     title = state.status === 'archived' ? 'Ankstesnis ciklas baigtas' : 'Ciklas anuliuotas';
   } else if (active && oldSchedule) {
     title = 'Ankstesnis ciklas · tik praėjęs laikas';
-  } else if (active) {
+  } else if (!modeled) {
+    title = 'Tik chronometras';
+  } else {
     modePhase = String(phase.index);
     if (phase.complete) {
-      title = modeled ? 'Paskutinis orientyras pasiektas' : 'Etapai pažymėti';
+      title = 'Sukietėjimo orientyras pasiektas';
     } else {
-      phaseLabel = reference ? 'Tyrimo orientyras' : 'Paskutinė pažymėta fazė';
+      phaseLabel = 'Orientacinė fazė';
       title = steps[phase.index].title;
       remaining = phase.remaining;
-      if (reference) nextTitle = steps[phase.index].short;
-      else if (phase.index < steps.length - 1) {
-        nextTitle = `Kita žyma: ${steps[phase.index + 1].title.toLocaleLowerCase('lt')}`;
-      }
+      nextTitle = steps[phase.index].short;
     }
-  } else if (modeled) {
-    remaining = config.boundaries[0];
   }
 
   if (document.body.dataset.phase !== modePhase) document.body.dataset.phase = modePhase;
@@ -243,8 +227,6 @@ function renderControls() {
   const selected = PRODUCTS.find(item => item.id === config.productId);
   const active = state?.status === 'active';
   const adjustable = !state && !concurrent && !corruptRecord && !pending;
-  const modeled = config.boundaries !== null;
-  const steps = phasesFor(config);
   document.body.dataset.mode = config.mode;
   document.body.dataset.running = String(active);
   setText(element('session-mode'), selected?.reason ?? 'Rankinis režimas');
@@ -253,21 +235,12 @@ function renderControls() {
   element('setup').hidden = Boolean(state) || corruptRecord;
   element('session-actions').hidden = !state && !corruptRecord;
   product.disabled = !adjustable;
-  setText(element('method'), modeled ? `Tyrimo sąlygos: ${config.conditions}`
-    : 'Fazes žymėkite rankiniu būdu pagal taikomą instrukciją.');
   start.disabled = !adjustable;
-  document.body.classList.toggle('is-ready', adjustable);
   abandon.hidden = !active;
   abandon.disabled = concurrent || pending;
   newSession.hidden = !corruptRecord && (!state || active);
   newSession.disabled = concurrent || pending;
   setText(newSession, corruptRecord ? 'Išvalyti netinkamą įrašą' : 'Naujas ciklas');
-  manualNext.hidden = !active || modeled || Boolean(state.issue) || concurrent || state.marks.length > phases.length;
-  manualNext.disabled = concurrent || pending;
-  if (!manualNext.hidden) {
-    const label = state.marks.length < phases.length ? steps[state.marks.length].title : 'Baigti etapų žymėjimą';
-    setText(manualNext, state.marks.length < phases.length ? `Pažymėti: ${label.toLocaleLowerCase('lt')}` : label);
-  }
   modeButton.disabled = changingDisplay || (!active && !document.body.classList.contains('or-mode'));
   wake.hidden = !active || !('wakeLock' in navigator);
   syncWakeButton();
@@ -405,7 +378,7 @@ start.addEventListener('click', async () => {
   }
   pending = false;
   render();
-  if (live) (manualNext.hidden ? modeButton : manualNext).focus();
+  if (live) modeButton.focus();
 });
 
 function takeSample() {
@@ -444,19 +417,6 @@ function queueAnimation() {
   }
 }
 
-manualNext.addEventListener('click', () => {
-  const tick = takeSample();
-  if (!tick || tick.issue || manualNext.disabled || manualNext.hidden || !checkUnchanged()) return;
-  const state = live.state;
-  live.state = { ...state, marks: [...state.marks, Math.floor(tick.elapsed)] };
-  save(live.state);
-  render();
-  if (manualNext.hidden) {
-    const target = document.body.classList.contains('or-mode') ? modeButton : abandon;
-    target.focus();
-  }
-});
-
 function ask(kind, trigger, title, body, label) {
   confirmAction = { kind, id: live?.state.id, trigger };
   dialog.returnValue = 'cancel';
@@ -469,7 +429,7 @@ abandon.addEventListener('click', () => {
   ask('abandon', abandon, 'Anuliuoti šį ciklą?', 'Laikmatis ir fazių rodinys bus sustabdyti. Tai nekeičia fizinio cemento kietėjimo.', 'Anuliuoti ciklą');
 });
 newSession.addEventListener('click', () => {
-  ask('clear', newSession, 'Išvalyti išsaugotą ciklą?', 'Šio ciklo laikas ir žymos bus išvalyti. Naujas laikmatis neprasidės automatiškai.', 'Išvalyti ciklą');
+  void applyAction({ kind: 'clear', id: live?.state.id });
 });
 
 dialog.addEventListener('close', async () => {
@@ -480,6 +440,10 @@ dialog.addEventListener('close', async () => {
     action.trigger.focus();
     return;
   }
+  await applyAction(action);
+});
+
+async function applyAction(action) {
   if (concurrent || action.id !== live?.state.id) return;
   pending = true;
   renderControls();
@@ -516,7 +480,7 @@ dialog.addEventListener('close', async () => {
   render();
   const target = live || corruptRecord ? newSession : start;
   if (!target.hidden && !target.disabled) target.focus();
-});
+}
 
 window.addEventListener('storage', event => {
   if (event.key !== STORAGE_KEY && event.key !== LEGACY_KEY && event.key !== null) return;

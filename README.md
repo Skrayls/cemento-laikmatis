@@ -6,8 +6,8 @@ Lietuviškas cemento paruošimo chronometras su proporcinga tyrimo orientyrų la
 
 ## Produktai ir temperatūra
 
-- **Bendras PMMA (numatytasis):** „SmartSet HV“ tyrimo orientyrai ties 20 °C: 148 ± 7 s ir 534 ± 17 s nuo maišymo pradžios. 386 ± 21 s yra intervalas, ne atskiras taškas.
-- **Refobacin Bone Cement R** ir **Hi-Fatigue G:** rankinės fazių žymos, be automatinių perėjimų. [Šaltiniai ir taikymo ribos](docs/cement-research.md).
+- **Bendras PMMA (numatytasis):** „SmartSet HV“ tyrimo orientyrai ties 20 °C: atskiras 30 s maišymo orientyras ir tyrimo rodmenys 148 ± 7 s bei 534 ± 17 s nuo maišymo pradžios. 386 ± 21 s yra intervalas, ne atskiras taškas.
+- **Refobacin Bone Cement R** ir **Hi-Fatigue G:** tik chronometras, be automatinių perėjimų. [Šaltiniai ir taikymo ribos](docs/cement-research.md).
 
 ## Paleidimas ir patikra
 

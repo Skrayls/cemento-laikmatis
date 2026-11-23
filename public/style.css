@@ -387,7 +387,7 @@ dialog p { margin: .7rem 0 1rem; color: var(--muted); }
 
 body.or-mode .sources, body.or-mode #abandon, body.or-mode #new-session { display: none; }
 body.or-mode footer { justify-content: center; }
-body.or-mode .controls:has(#manual-next[hidden]) { display: none; }
+body.or-mode .controls { display: none; }
 body.or-mode #elapsed { font-size: clamp(5rem, min(26vw, 38vh), 35rem); }
 body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); }
 
@@ -425,7 +425,7 @@ body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); 
   body[data-running="true"] .timeline { grid-column: 1; }
   body[data-running="true"] .controls { grid-column: 2; align-self: center; margin-top: 0; }
   body[data-running="true"] .session-actions { max-width: min(44vw, 25rem); }
-  body.or-mode .monitor:has(#manual-next[hidden]) .timeline { grid-column: 1 / -1; }
+  body.or-mode .monitor .timeline { grid-column: 1 / -1; }
   .masthead { padding-block: .2rem; min-height: 48px; }
   .monitor { gap: .28rem; }
   .clock-label { font-size: .68rem; }
@@ -461,16 +461,6 @@ body.or-mode #elapsed.hours { font-size: clamp(3.5rem, min(15vw, 29vh), 28rem); 
   *, *::before, *::after { transition: none !important; }
 }
 
-/* Configuration is its own view; active timing gets the entire monitor. */
-body.is-ready .monitor {
-  max-width: 42rem;
-}
-body.is-ready .monitor > :is(.clock, .phase-card, .timeline) {
-  display: none;
-}
-body.is-ready .session-heading {
-  flex-wrap: wrap;
-}
 #start {
   width: 100%;
   min-height: 52px;
@@ -479,3 +469,10 @@ body.is-ready .session-heading {
 .timeline-track {
   min-height: 14px;
 }
+
+body[data-mode="reference"] #phase {
+  font-size: clamp(1.2rem, 2.75vw, 4.6rem);
+}
+.setup-fields { grid-template-columns: 1fr; }
+body:not([data-running="true"]) .monitor { gap: .65rem; }
+body:not([data-running="true"]) #elapsed { font-size: clamp(4rem, min(27vw, 25vh), 19rem); }

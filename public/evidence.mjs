@@ -1,3 +1,5 @@
+export const MIXING_REFERENCE = Object.freeze({ seconds: 30, source: 'Heraeus PALACADEMY, Cement handling, p. 10' });
+
 export const SMARTSET = Object.freeze({
   version: 'PMC4650370-control-20C-v1',
   temperature: 20,
